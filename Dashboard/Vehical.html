@@ -1,0 +1,5273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>FogGuard Mine Dumper Safety System</title>
+
+<!-- =========================================================
+     LEAFLET MAP
+========================================================= -->
+
+<link
+rel="stylesheet"
+href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- =========================================================
+     THREE.JS
+========================================================= -->
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+
+
+<style>
+
+/* =========================================================
+   GLOBAL
+========================================================= */
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+:root{
+
+    --bg:#05090d;
+    --panel:#0c141b;
+    --panel2:#101b23;
+    --border:#253742;
+
+    --text:#e9f2f7;
+    --muted:#82929e;
+
+    --green:#20d889;
+    --yellow:#ffc83d;
+    --red:#ff4657;
+    --blue:#35a9ff;
+    --cyan:#21d9e8;
+}
+
+body{
+
+    background:var(--bg);
+    color:var(--text);
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    body{
+    background:var(--bg);
+    color:var(--text);
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    min-height:100vh;
+
+    /* ENABLE PAGE SCROLL */
+    overflow-x:hidden;
+    overflow-y:auto;
+}
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.header{
+
+    height:62px;
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    padding:0 15px;
+
+    background:#080f15;
+
+    border-bottom:
+        1px solid var(--border);
+}
+
+.brand{
+
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.logo{
+
+    width:36px;
+    height:36px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border-radius:8px;
+
+    background:#10212c;
+
+    border:1px solid #315465;
+
+    color:#35a9ff;
+
+    font-size:19px;
+}
+
+.brand h1{
+
+    font-size:18px;
+
+    letter-spacing:1px;
+}
+
+.brand small{
+
+    display:block;
+
+    margin-top:2px;
+
+    color:var(--muted);
+
+    font-size:9px;
+}
+
+.header-right{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:9px;
+}
+
+.header-status{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:5px;
+
+    color:var(--green);
+
+    font-size:9px;
+}
+
+.dot{
+
+    width:7px;
+    height:7px;
+
+    border-radius:50%;
+
+    background:currentColor;
+
+    box-shadow:
+        0 0 8px currentColor;
+}
+
+.header-btn{
+
+    padding:7px 9px;
+
+    background:#111d26;
+
+    border:
+        1px solid #263945;
+
+    border-radius:5px;
+
+    color:#d9e4ea;
+
+    font-size:9px;
+
+    cursor:pointer;
+}
+
+.header-btn:hover{
+
+    background:#1b2d39;
+}
+
+
+/* =========================================================
+   MAIN LAYOUT
+========================================================= */
+
+.main{
+    min-height:calc(100vh - 62px);
+    height:auto;
+
+    display:grid;
+    grid-template-columns:235px minmax(500px,1fr) 345px;
+
+    gap:8px;
+    padding:8px;
+
+    align-items:start;
+}
+
+
+/* =========================================================
+   PANEL
+========================================================= */
+
+.panel{
+
+    background:
+        linear-gradient(
+            145deg,
+            #0d161e,
+            #091117
+        );
+
+    border:
+        1px solid var(--border);
+
+    border-radius:8px;
+
+    overflow:hidden;
+}
+
+.panel-title{
+
+    height:35px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    padding:0 10px;
+
+    border-bottom:
+        1px solid var(--border);
+
+    color:#b9c8d0;
+
+    font-size:9px;
+
+    letter-spacing:1px;
+
+    text-transform:uppercase;
+}
+
+
+/* =========================================================
+   LEFT / RIGHT
+========================================================= */
+
+.left,
+.right{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:8px;
+
+    min-height:0;
+}
+
+
+/* =========================================================
+   VEHICLE
+========================================================= */
+
+.vehicle-box{
+
+    padding:11px;
+}
+
+.vehicle-id{
+
+    font-size:22px;
+
+    font-weight:bold;
+}
+
+.vehicle-type{
+
+    margin-top:2px;
+
+    color:var(--muted);
+
+    font-size:9px;
+}
+
+.data-grid{
+
+    display:grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap:6px;
+
+    margin-top:11px;
+}
+
+.data-card{
+
+    padding:8px;
+
+    border:
+        1px solid #20313d;
+
+    background:#111c25;
+
+    border-radius:5px;
+}
+
+.data-card span{
+
+    display:block;
+
+    color:var(--muted);
+
+    font-size:7px;
+
+    text-transform:uppercase;
+}
+
+.data-card strong{
+
+    display:block;
+
+    margin-top:4px;
+
+    font-size:14px;
+}
+
+
+/* =========================================================
+   SENSOR
+========================================================= */
+
+.sensor-list{
+
+    padding:
+        5px 10px 8px;
+}
+
+.sensor{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:7px 0;
+
+    border-bottom:
+        1px solid #17232c;
+
+    font-size:9px;
+}
+
+.sensor:last-child{
+
+    border-bottom:0;
+}
+
+.sensor-name{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:6px;
+}
+
+.sensor-dot{
+
+    width:6px;
+    height:6px;
+
+    border-radius:50%;
+}
+
+.online{
+
+    background:var(--green);
+
+    box-shadow:
+        0 0 7px var(--green);
+}
+
+.offline{
+
+    background:var(--red);
+
+    box-shadow:
+        0 0 7px var(--red);
+}
+
+.warning-dot{
+
+    background:var(--yellow);
+
+    box-shadow:
+        0 0 7px var(--yellow);
+}
+
+
+/* =========================================================
+   LEFT CONTROL PANEL
+========================================================= */
+
+.control-grid{
+
+    display:grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap:5px;
+
+    padding:9px;
+}
+
+.control-btn{
+
+    min-height:37px;
+
+    border:
+        1px solid #293d49;
+
+    border-radius:5px;
+
+    background:#111e27;
+
+    color:#cbd8df;
+
+    cursor:pointer;
+
+    font-size:8px;
+
+    transition:.15s;
+}
+
+.control-btn:hover{
+
+    background:#1b303c;
+
+    border-color:#426171;
+}
+
+.control-btn.active{
+
+    background:#12382d;
+
+    border-color:#1f9d70;
+
+    color:#5ff0b1;
+}
+
+.control-btn.warning-active{
+
+    background:#453616;
+
+    border-color:#a47d1d;
+
+    color:#ffda68;
+}
+
+.control-btn.danger-active{
+
+    background:#44151c;
+
+    border-color:#a83242;
+
+    color:#ff7582;
+}
+
+
+/* =========================================================
+   SELECT
+========================================================= */
+
+select,
+input{
+
+    width:100%;
+
+    background:#111c25;
+
+    color:#dce8ee;
+
+    border:
+        1px solid #293d49;
+
+    border-radius:5px;
+
+    padding:7px;
+
+    font-size:9px;
+
+    outline:none;
+}
+
+.select-wrap{
+
+    padding:8px 9px 0;
+}
+
+
+/* =========================================================
+   CENTER
+========================================================= */
+
+.center{
+
+    display:grid;
+
+    grid-template-rows:
+        minmax(450px,1fr)
+        150px;
+
+    gap:8px;
+
+    min-width:0;
+
+    min-height:0;
+}
+
+
+/* =========================================================
+   LIDAR
+========================================================= */
+
+.lidar-view{
+
+    position:relative;
+
+    overflow:hidden;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:8px;
+
+    background:#04080b;
+}
+
+#lidarCanvas{
+
+    position:absolute;
+
+    inset:0;
+
+    width:100%;
+
+    height:100%;
+}
+
+.lidar-top{
+
+    position:absolute;
+
+    top:10px;
+
+    left:10px;
+
+    right:10px;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    z-index:5;
+
+    pointer-events:none;
+}
+
+.lidar-tag{
+
+    padding:6px 8px;
+
+    background:
+        rgba(4,10,14,.88);
+
+    border:
+        1px solid #2b424e;
+
+    border-radius:5px;
+
+    font-size:8px;
+}
+
+.live{
+
+    color:var(--green);
+}
+
+
+/* =========================================================
+   LIDAR INFO
+========================================================= */
+
+.lidar-info{
+
+    position:absolute;
+
+    top:52px;
+
+    left:10px;
+
+    z-index:5;
+
+    padding:8px;
+
+    background:
+        rgba(4,10,14,.88);
+
+    border:
+        1px solid #263b47;
+
+    border-radius:5px;
+
+    font-family:monospace;
+
+    font-size:8px;
+
+    line-height:1.7;
+
+    color:#aabcc6;
+}
+
+.lidar-info b{
+
+    color:#e5eef3;
+}
+
+
+/* =========================================================
+   LIDAR LEGEND
+========================================================= */
+
+.lidar-legend{
+
+    position:absolute;
+
+    top:52px;
+
+    right:10px;
+
+    z-index:5;
+
+    width:125px;
+
+    padding:8px;
+
+    background:
+        rgba(4,10,14,.88);
+
+    border:
+        1px solid #263b47;
+
+    border-radius:5px;
+
+    font-size:8px;
+}
+
+.gradient{
+
+    height:7px;
+
+    margin-top:5px;
+
+    border-radius:5px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #1e35ff,
+            #00cfff,
+            #00ed72,
+            #fff000,
+            #ff7100,
+            #ff2020
+        );
+}
+
+
+/* =========================================================
+   CAMERA PREVIEW
+========================================================= */
+
+.camera-preview{
+
+    position:absolute;
+
+    bottom:10px;
+
+    left:10px;
+
+    width:175px;
+
+    height:85px;
+
+    z-index:10;
+
+    overflow:hidden;
+
+    border:
+        1px solid #395361;
+
+    border-radius:6px;
+
+    background:
+        linear-gradient(
+            #253038,
+            #10171c 50%,
+            #252b2f
+        );
+}
+
+.camera-preview:before{
+
+    content:"FRONT CAMERA";
+
+    position:absolute;
+
+    z-index:4;
+
+    top:6px;
+
+    left:7px;
+
+    color:#d6e1e7;
+
+    font-size:7px;
+}
+
+.camera-road{
+
+    position:absolute;
+
+    bottom:-25px;
+
+    left:20%;
+
+    width:60%;
+
+    height:90%;
+
+    background:
+        linear-gradient(
+            90deg,
+            #1c2327,
+            #5a6469,
+            #1c2327
+        );
+
+    transform:
+        perspective(100px)
+        rotateX(25deg);
+}
+
+.camera-line{
+
+    position:absolute;
+
+    left:50%;
+
+    bottom:-10px;
+
+    width:3px;
+
+    height:40px;
+
+    background:#d7d19c;
+
+    animation:
+        roadMove 1s linear infinite;
+}
+
+@keyframes roadMove{
+
+    from{
+        transform:translateY(-60px);
+    }
+
+    to{
+        transform:translateY(80px);
+    }
+}
+
+
+/* =========================================================
+   DETECTION BOXES
+========================================================= */
+
+.detect-box{
+
+    position:absolute;
+
+    z-index:7;
+
+    border:2px solid var(--yellow);
+
+    color:#fff;
+
+    font-size:8px;
+
+    padding:3px;
+
+    background:
+        rgba(255,200,61,.08);
+}
+
+.detect1{
+
+    width:70px;
+
+    height:90px;
+
+    left:39%;
+
+    top:31%;
+}
+
+.detect2{
+
+    width:55px;
+
+    height:65px;
+
+    left:59%;
+
+    top:42%;
+
+    border-color:var(--cyan);
+}
+
+.detect-label{
+
+    position:absolute;
+
+    top:-17px;
+
+    left:-2px;
+
+    padding:3px 5px;
+
+    background:#101b22;
+
+    white-space:nowrap;
+}
+
+
+/* =========================================================
+   LIDAR CONTROLS
+========================================================= */
+
+.lidar-controls{
+
+    position:absolute;
+
+    bottom:10px;
+
+    right:10px;
+
+    z-index:15;
+
+    display:flex;
+
+    gap:4px;
+}
+
+.small-btn{
+
+    padding:6px 7px;
+
+    border:
+        1px solid #304652;
+
+    border-radius:4px;
+
+    background:
+        rgba(5,12,17,.9);
+
+    color:#c8d6dd;
+
+    cursor:pointer;
+
+    font-size:7px;
+}
+
+.small-btn:hover{
+
+    background:#19303d;
+}
+
+
+/* =========================================================
+   BOTTOM METRICS
+========================================================= */
+
+.bottom-grid{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(4,1fr);
+
+    gap:8px;
+}
+
+.metric-panel{
+
+    background:#0c151d;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:7px;
+
+    padding:10px;
+}
+
+.metric-title{
+
+    color:var(--muted);
+
+    font-size:7px;
+
+    text-transform:uppercase;
+}
+
+.metric-value{
+
+    margin-top:5px;
+
+    font-size:21px;
+
+    font-weight:bold;
+}
+
+.bar{
+
+    height:5px;
+
+    margin-top:8px;
+
+    border-radius:5px;
+
+    background:#192730;
+
+    overflow:hidden;
+}
+
+.bar-fill{
+
+    height:100%;
+
+    width:70%;
+
+    background:var(--green);
+
+    transition:.3s;
+}
+
+
+/* =========================================================
+   ALERT CENTER
+========================================================= */
+
+.alert{
+
+    margin:8px;
+
+    padding:10px;
+
+    border:
+        1px solid #225b45;
+
+    border-radius:6px;
+
+    background:#0e1d18;
+}
+
+.alert.warning{
+
+    border-color:#836719;
+
+    background:#201a0b;
+}
+
+.alert.danger{
+
+    border-color:#8c303d;
+
+    background:#200b10;
+}
+
+.alert-title{
+
+    font-size:11px;
+
+    font-weight:bold;
+}
+
+.alert-text{
+
+    margin-top:6px;
+
+    color:#a7b6bf;
+
+    font-size:8px;
+
+    line-height:1.5;
+}
+
+.alert-row{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+}
+
+
+/* =========================================================
+   MESSAGE CENTER
+========================================================= */
+
+.message-box{
+
+    padding:8px;
+
+    display:grid;
+
+    gap:5px;
+}
+
+.message-buttons{
+
+    display:grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap:5px;
+}
+
+.send-btn{
+
+    padding:8px;
+
+    border:0;
+
+    border-radius:5px;
+
+    background:#12608a;
+
+    color:white;
+
+    cursor:pointer;
+
+    font-size:8px;
+
+    font-weight:bold;
+}
+
+.send-btn:hover{
+
+    background:#1680b5;
+}
+
+
+/* =========================================================
+   MAP
+========================================================= */
+
+.map-panel{
+
+    flex:1;
+
+    min-height:245px;
+
+    display:flex;
+
+    flex-direction:column;
+}
+
+#mineMap{
+
+    flex:1;
+
+    min-height:210px;
+
+    background:#101820;
+}
+
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip{
+
+    background:#0c151c;
+
+    color:#e3edf2;
+}
+
+.leaflet-popup-content{
+
+    font-size:10px;
+
+    line-height:1.5;
+}
+
+.leaflet-control-zoom a{
+
+    background:#101c24 !important;
+
+    color:white !important;
+
+    border-color:#334852 !important;
+}
+
+
+/* =========================================================
+   EMERGENCY
+========================================================= */
+
+.emergency{
+
+    padding:9px;
+
+    border:
+        1px solid #66313b;
+
+    border-radius:6px;
+
+    background:#180c10;
+}
+
+.emergency button{
+
+    width:100%;
+
+    margin-top:6px;
+
+    padding:10px;
+
+    border:0;
+
+    border-radius:5px;
+
+    background:#b51f34;
+
+    color:#fff;
+
+    font-size:9px;
+
+    font-weight:bold;
+
+    cursor:pointer;
+}
+
+.emergency button:hover{
+
+    background:#dc2942;
+}
+
+.reset-btn{
+
+    width:100%;
+
+    margin-top:5px;
+
+    padding:7px;
+
+    background:#243640;
+
+    color:#d9e5ea;
+
+    border:0;
+
+    border-radius:5px;
+
+    cursor:pointer;
+
+    font-size:8px;
+}
+
+
+/* =========================================================
+   EVENT LOG
+========================================================= */
+
+.log{
+
+    max-height:100px;
+
+    overflow:auto;
+
+    padding:5px 9px;
+}
+
+.log-item{
+
+    padding:4px 0;
+
+    border-bottom:
+        1px solid #17242d;
+
+    color:#8fa1ac;
+
+    font-size:8px;
+}
+
+.log-time{
+
+    color:#4ea7cf;
+
+    margin-right:5px;
+}
+
+
+/* =========================================================
+   ALERT BANNER
+========================================================= */
+
+.alert-banner{
+
+    position:fixed;
+
+    top:62px;
+
+    left:50%;
+
+    transform:
+        translateX(-50%)
+        translateY(-100px);
+
+    z-index:500;
+
+    min-width:420px;
+
+    padding:12px 18px;
+
+    border:
+        1px solid var(--red);
+
+    border-radius:0 0 8px 8px;
+
+    background:#300c13;
+
+    color:white;
+
+    text-align:center;
+
+    box-shadow:
+        0 8px 30px
+        rgba(0,0,0,.6);
+
+    transition:.3s;
+
+    font-size:11px;
+
+    font-weight:bold;
+}
+
+.alert-banner.show{
+
+    transform:
+        translateX(-50%)
+        translateY(0);
+}
+
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+.modal{
+
+    position:fixed;
+
+    inset:0;
+
+    display:none;
+
+    align-items:center;
+
+    justify-content:center;
+
+    z-index:1000;
+
+    background:
+        rgba(0,0,0,.78);
+}
+
+.modal-box{
+
+    width:420px;
+
+    background:#101a22;
+
+    border:
+        1px solid #40545f;
+
+    border-radius:8px;
+
+    padding:20px;
+}
+
+.modal-box h2{
+
+    margin-bottom:12px;
+}
+
+.modal-box p{
+
+    color:#9eafb9;
+
+    font-size:10px;
+
+    line-height:1.8;
+}
+
+.close-modal{
+
+    width:100%;
+
+    margin-top:15px;
+
+    padding:9px;
+
+    border:0;
+
+    border-radius:5px;
+
+    background:#293e4a;
+
+    color:#fff;
+
+    cursor:pointer;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media(max-width:1200px){
+
+    body{
+        overflow:auto;
+    }
+
+    .main{
+
+        height:auto;
+
+        grid-template-columns:1fr;
+    }
+
+    .center{
+
+        min-height:650px;
+    }
+
+    .left,
+    .right{
+
+        min-height:400px;
+    }
+}
+
+
+/* =========================================================
+   V2V / V2I COMMUNICATION ENHANCEMENT
+========================================================= */
+.comm-mode-row{
+    display:flex;
+    gap:8px;
+    margin-bottom:10px;
+}
+.comm-mode-btn{
+    flex:1;
+    padding:9px 10px;
+    border:1px solid #244b59;
+    background:#0b151b;
+    color:#9bb5bf;
+    border-radius:5px;
+    cursor:pointer;
+    font-weight:700;
+    letter-spacing:.4px;
+}
+.comm-mode-btn.active{
+    border-color:#20d889;
+    color:#20d889;
+    box-shadow:0 0 10px rgba(32,216,137,.16);
+}
+.comm-status{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px;
+    margin:10px 0;
+}
+.comm-stat{
+    background:#081117;
+    border:1px solid #17333d;
+    border-radius:5px;
+    padding:8px;
+    text-align:center;
+    font-size:11px;
+}
+.comm-stat b{display:block;font-size:13px;margin-top:3px;color:#20d889}
+.comm-history{
+    max-height:125px;
+    overflow:auto;
+    margin-top:10px;
+    border-top:1px solid #17333d;
+    padding-top:6px;
+}
+.comm-history-row{
+    display:grid;
+    grid-template-columns:55px 75px 1fr;
+    gap:6px;
+    padding:6px 4px;
+    border-bottom:1px solid rgba(35,70,80,.45);
+    font-size:10px;
+}
+.comm-history-row .tx{color:#20d889;font-weight:700}
+.comm-history-row .channel{color:#55c9ff;font-weight:700}
+.comm-history-row .msg{color:#c5d3d8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+</style>
+</head>
+
+
+<body>
+
+
+<!-- =========================================================
+     HEADER
+========================================================= -->
+
+<header class="header">
+
+    <div class="brand">
+
+        <div class="logo">
+            ◈
+        </div>
+
+        <div>
+
+            <h1>
+                FOG<span style="color:#35a9ff">
+                    GUARD
+                </span>
+            </h1>
+
+            <small>
+                Mine Dumper Safety & V2X Driver Assistance
+            </small>
+
+        </div>
+
+    </div>
+
+
+    <div class="header-right">
+
+        <div class="header-status">
+            <span class="dot"></span>
+            SYSTEM ONLINE
+        </div>
+
+        <div
+            class="header-status"
+            id="v2xStatus">
+
+            <span class="dot"></span>
+            V2X CONNECTED
+
+        </div>
+
+        <button
+            class="header-btn"
+            onclick="runSystemTest()">
+
+            SYSTEM TEST
+
+        </button>
+
+        <button
+            class="header-btn"
+            onclick="toggleFullscreen()">
+
+            ⛶
+
+        </button>
+
+        <button
+            class="header-btn"
+            onclick="openSystemInfo()">
+
+            SYSTEM
+
+        </button>
+
+    </div>
+
+</header>
+
+
+<!-- =========================================================
+     ALERT BANNER
+========================================================= -->
+
+<div
+    class="alert-banner"
+    id="alertBanner">
+
+    ⚠️
+    <span id="bannerText">
+        SAFETY ALERT
+    </span>
+
+</div>
+
+
+<!-- =========================================================
+     MAIN
+========================================================= -->
+
+<main class="main">
+
+
+<!-- =========================================================
+     LEFT COLUMN
+========================================================= -->
+
+<section class="left">
+
+
+    <!-- VEHICLE -->
+
+    <div class="panel">
+
+        <div class="panel-title">
+
+            Vehicle Status
+
+            <span
+                id="vehicleStatus"
+                style="color:#20d889">
+
+                ● ONLINE
+
+            </span>
+
+        </div>
+
+
+        <div class="vehicle-box">
+
+            <div class="vehicle-id">
+                D-07
+            </div>
+
+            <div class="vehicle-type">
+                Heavy Mine Dumper
+            </div>
+
+
+            <div class="data-grid">
+
+                <div class="data-card">
+
+                    <span>
+                        Speed
+                    </span>
+
+                    <strong>
+                        <span id="speed">
+                            18
+                        </span>
+                        km/h
+                    </strong>
+
+                </div>
+
+
+                <div class="data-card">
+
+                    <span>
+                        RPM
+                    </span>
+
+                    <strong id="rpm">
+                        1480
+                    </strong>
+
+                </div>
+
+
+                <div class="data-card">
+
+                    <span>
+                        Fuel
+                    </span>
+
+                    <strong id="fuel">
+                        72%
+                    </strong>
+
+                </div>
+
+
+                <div class="data-card">
+
+                    <span>
+                        Temp
+                    </span>
+
+                    <strong id="temp">
+                        76°C
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- SENSOR -->
+
+    <div class="panel">
+
+        <div class="panel-title">
+
+            Sensor Network
+
+            <span>
+                <span id="sensorCount">
+                    6
+                </span>/6
+            </span>
+
+        </div>
+
+
+        <div class="sensor-list">
+
+
+            <div class="sensor">
+
+                <div class="sensor-name">
+
+                    <span
+                        id="lidarDot"
+                        class="sensor-dot online">
+                    </span>
+
+                    LiDAR
+
+                </div>
+
+                <span id="lidarState">
+                    ONLINE
+                </span>
+
+            </div>
+
+
+            <div class="sensor">
+
+                <div class="sensor-name">
+
+                    <span
+                        id="radarDot"
+                        class="sensor-dot online">
+                    </span>
+
+                    mmWave Radar
+
+                </div>
+
+                <span id="radarState">
+                    ONLINE
+                </span>
+
+            </div>
+
+
+            <div class="sensor">
+
+                <div class="sensor-name">
+
+                    <span
+                        id="cameraDot"
+                        class="sensor-dot online">
+                    </span>
+
+                    AI Camera
+
+                </div>
+
+                <span>
+                    ONLINE
+                </span>
+
+            </div>
+
+
+            <div class="sensor">
+
+                <div class="sensor-name">
+
+                    <span
+                        class="sensor-dot online">
+                    </span>
+
+                    GPS / DGPS
+
+                </div>
+
+                <span>
+                    LOCKED
+                </span>
+
+            </div>
+
+
+            <div class="sensor">
+
+                <div class="sensor-name">
+
+                    <span
+                        class="sensor-dot online">
+                    </span>
+
+                    IMU
+
+                </div>
+
+                <span>
+                    ONLINE
+                </span>
+
+            </div>
+
+
+            <div class="sensor">
+
+                <div class="sensor-name">
+
+                    <span
+                        class="sensor-dot online">
+                    </span>
+
+                    ESP32
+
+                </div>
+
+                <span>
+                    CONNECTED
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- VEHICLE CONTROLS -->
+
+    <div class="panel">
+
+        <div class="panel-title">
+            Vehicle Controls
+        </div>
+
+
+        <div class="select-wrap">
+
+            <select
+                id="driveMode"
+                onchange="changeDriveMode()">
+
+                <option value="ASSIST">
+                    DRIVER ASSIST MODE
+                </option>
+
+                <option value="MANUAL">
+                    MANUAL MODE
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div class="control-grid">
+
+
+            <button
+                class="control-btn"
+                id="hornBtn"
+                onclick="toggleHorn()">
+
+                🔊 HORN
+
+            </button>
+
+
+            <button
+                class="control-btn"
+                id="lightBtn"
+                onclick="toggleLights()">
+
+                💡 HEADLIGHT
+
+            </button>
+
+
+            <button
+                class="control-btn"
+                id="beaconBtn"
+                onclick="toggleBeacon()">
+
+                🚨 BEACON
+
+            </button>
+
+
+            <button
+                class="control-btn"
+                id="alarmBtn"
+                onclick="toggleAlarm()">
+
+                🔔 ALARM
+
+            </button>
+
+
+            <button
+                class="control-btn"
+                onclick="changeSpeed(-2)">
+
+                − SPEED
+
+            </button>
+
+
+            <button
+                class="control-btn"
+                onclick="changeSpeed(2)">
+
+                + SPEED
+
+            </button>
+
+
+            <button
+                class="control-btn"
+                onclick="cameraMode()">
+
+                👁 SURROUND VIEW
+
+            </button>
+
+
+            <button
+                class="control-btn"
+                onclick="runSensorTest()">
+
+                🔧 SENSOR TEST
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- PERCEPTION CONTROLS -->
+
+    <div class="panel">
+
+        <div class="panel-title">
+            Perception Controls
+        </div>
+
+
+        <div class="control-grid">
+
+
+            <button
+                class="control-btn active"
+                id="lidarBtn"
+                onclick="toggleSensor('lidar')">
+
+                ◉ LiDAR
+
+            </button>
+
+
+            <button
+                class="control-btn active"
+                id="radarBtn"
+                onclick="toggleSensor('radar')">
+
+                ◉ RADAR
+
+            </button>
+
+
+            <button
+                class="control-btn active"
+                id="cameraBtn"
+                onclick="toggleSensor('camera')">
+
+                ◉ CAMERA
+
+            </button>
+
+
+            <button
+                class="control-btn"
+                onclick="resetLidar()">
+
+                ↻ RESET 3D
+
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     CENTER
+========================================================= -->
+
+<section class="center">
+
+
+    <!-- =====================================================
+         3D LIDAR
+    ====================================================== -->
+
+    <div
+        class="lidar-view"
+        id="lidarView">
+
+
+        <canvas
+            id="lidarCanvas">
+        </canvas>
+
+
+        <div class="lidar-top">
+
+            <div class="lidar-tag">
+
+                ◉ 3D VEHICLE SURROUND VIEW
+
+            </div>
+
+
+            <div
+                class="lidar-tag live"
+                id="lidarLive">
+
+                ● LIVE 3D SURROUND
+
+            </div>
+
+        </div>
+
+
+        <div class="lidar-info">
+
+            <div>
+                <b>VEHICLE</b>
+                D-07
+            </div>
+
+            <div>
+                <b>HEADING</b>
+                <span id="heading">
+                    312.4°
+                </span>
+            </div>
+
+            <div>
+                <b>POINTS</b>
+                <span id="pointCount">
+                    284231
+                </span>
+            </div>
+
+            <div>
+                <b>FPS</b>
+                <span id="fps">
+                    18
+                </span>
+            </div>
+
+            <div>
+                <b>RANGE</b>
+                120 m
+            </div>
+
+            <div>
+                <b>CAMERA</b>
+                <span id="cameraModeText">
+                    FRONT
+                </span>
+            </div>
+
+        </div>
+
+
+        <div class="lidar-legend">
+
+            <b>
+                3D DEPTH / ELEVATION
+            </b>
+
+            <div class="gradient"></div>
+
+            <div
+                style="
+                display:flex;
+                justify-content:space-between;
+                color:#81929c;
+                margin-top:3px;">
+
+                <span>NEAR</span>
+                <span>FAR</span>
+
+            </div>
+
+            <br>
+
+            <div>
+                🟢 Terrain
+            </div>
+
+            <div>
+                🔵 Road
+            </div>
+
+            <div>
+                🟡 Vehicle
+            </div>
+
+            <div>
+                🔴 Hazard
+            </div>
+
+        </div>
+
+
+        <!-- 3D SURROUND HUD -->
+
+        <div class="surround-hud">
+            <div class="surround-chip">360° VEHICLE AWARENESS</div>
+            <div class="surround-chip">DRAG = ROTATE • WHEEL = ZOOM</div>
+        </div>
+
+        <div class="surround-label front">FRONT • AI OBJECT ZONE</div>
+        <div class="surround-label left-zone">LEFT • RADAR</div>
+        <div class="surround-label right-zone">RIGHT • RADAR</div>
+        <div class="surround-label rear">REAR • V2V VEHICLES</div>
+
+        <!-- LIDAR / 3D BUTTONS -->
+
+        <div class="lidar-controls">
+
+            <button class="small-btn" onclick="resetLidar()">
+                RESET VIEW
+            </button>
+
+            <button class="small-btn" onclick="togglePointCloud()">
+                3D POINTS
+            </button>
+
+            <button class="small-btn" onclick="toggleAutoRotate()" id="autoRotateBtn">
+                AUTO ROTATE
+            </button>
+
+            <button class="small-btn" onclick="set3DView('top')">
+                TOP
+            </button>
+
+            <button class="small-btn" onclick="set3DView('driver')">
+                DRIVER
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- =====================================================
+         METRICS
+    ====================================================== -->
+
+    <div class="bottom-grid">
+
+
+        <div class="metric-panel">
+
+            <div class="metric-title">
+                Visibility
+            </div>
+
+            <div class="metric-value">
+
+                <span id="visibility">
+                    86
+                </span>
+                m
+
+            </div>
+
+            <div class="bar">
+
+                <div
+                    class="bar-fill"
+                    id="visibilityBar"
+                    style="width:86%">
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="metric-panel">
+
+            <div class="metric-title">
+                Following Distance
+            </div>
+
+            <div class="metric-value">
+
+                <span id="following">
+                    38
+                </span>
+                m
+
+            </div>
+
+            <div class="bar">
+
+                <div
+                    class="bar-fill"
+                    id="distanceBar"
+                    style="width:76%">
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="metric-panel">
+
+            <div class="metric-title">
+                Recommended Speed
+            </div>
+
+            <div class="metric-value">
+
+                <span id="recommended">
+                    25
+                </span>
+                km/h
+
+            </div>
+
+            <div class="bar">
+
+                <div
+                    class="bar-fill"
+                    id="speedBar"
+                    style="width:50%">
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="metric-panel">
+
+            <div class="metric-title">
+                Collision Risk
+            </div>
+
+            <div
+                class="metric-value"
+                id="riskValue"
+                style="color:#20d889">
+
+                LOW
+
+            </div>
+
+            <div class="bar">
+
+                <div
+                    class="bar-fill"
+                    id="riskBar"
+                    style="width:15%">
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     RIGHT
+========================================================= -->
+
+<section class="right">
+
+
+    <!-- SAFETY -->
+
+    <div class="panel">
+
+        <div class="panel-title">
+
+            Vehicle Safety Alert
+
+            <span id="alertLevel">
+                SAFE
+            </span>
+
+        </div>
+
+
+        <div
+            class="alert"
+            id="alertBox">
+
+            <div class="alert-row">
+
+                <div
+                    class="alert-title"
+                    id="alertTitle">
+
+                    SAFE TO PROCEED
+
+                </div>
+
+                <span id="alertIcon">
+                    ✓
+                </span>
+
+            </div>
+
+
+            <div
+                class="alert-text"
+                id="alertText">
+
+                All perception systems indicate
+                safe forward movement.
+
+            </div>
+
+
+            <button
+                class="ack"
+                onclick="acknowledgeAlert()"
+                style="
+                width:100%;
+                margin-top:7px;
+                padding:7px;
+                border:0;
+                border-radius:4px;
+                background:#263943;
+                color:white;
+                cursor:pointer;
+                font-size:8px;">
+
+                ACKNOWLEDGE ALERT
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         HAZARD SIMULATION
+    ====================================================== -->
+
+    <div class="panel">
+
+        <div class="panel-title">
+
+            Alert Simulation
+
+            <span>
+                DEMO
+
+            </span>
+
+        </div>
+
+
+        <div class="control-grid">
+
+
+            <button
+                class="control-btn warning-active"
+                onclick="simulateFog()">
+
+                🌫️ FOG ALERT
+
+            </button>
+
+
+            <button
+                class="control-btn danger-active"
+                onclick="simulateObstacle()">
+
+                🚚 OBSTACLE
+
+            </button>
+
+
+            <button
+                class="control-btn warning-active"
+                onclick="simulateOverspeed()">
+
+                ⚡ OVERSPEED
+
+            </button>
+
+
+            <button
+                class="control-btn"
+                onclick="clearHazard()">
+
+                ✓ CLEAR ALERT
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         V2V / V2I COMMUNICATION MESSAGE CENTER
+    ====================================================== -->
+
+    <div class="panel">
+
+        <div class="panel-title">
+            V2V / V2I COMMUNICATION CENTER
+            <span id="messageStatus" style="color:#20d889">READY</span>
+        </div>
+
+        <div class="message-box">
+
+            <div class="comm-mode-row">
+                <button id="v2vModeBtn" class="comm-mode-btn active"
+                        onclick="setCommMode('V2V')">
+                    📡 V2V VEHICLE
+                </button>
+                <button id="v2iModeBtn" class="comm-mode-btn"
+                        onclick="setCommMode('V2I')">
+                    🏢 V2I CONTROL
+                </button>
+            </div>
+
+            <select id="messageTarget">
+                <option value="ALL">📡 ALL NEARBY VEHICLES</option>
+                <option value="D-04">🚚 D-04</option>
+                <option value="D-11">🚚 D-11</option>
+                <option value="R-03">🚚 R-03</option>
+                <option value="CONTROL">🏢 CONTROL ROOM</option>
+            </select>
+
+            <select id="messageType">
+                <option value="SLOW_DOWN">⚠ SLOW DOWN</option>
+                <option value="FOG_AHEAD">🌫 FOG AHEAD</option>
+                <option value="OBSTACLE">🚧 OBSTACLE AHEAD</option>
+                <option value="ACCIDENT">🚨 ACCIDENT ALERT</option>
+                <option value="ROAD_BLOCK">⛔ ROAD BLOCK</option>
+                <option value="EMERGENCY">🆘 EMERGENCY</option>
+                <option value="CLEAR">✓ ROAD CLEAR</option>
+            </select>
+
+            <input id="customMessage" type="text"
+                   placeholder="Type custom safety message...">
+
+            <div class="comm-status">
+                <div class="comm-stat">V2V LINK<b id="v2vLink">ONLINE</b></div>
+                <div class="comm-stat">V2I LINK<b id="v2iLink">ONLINE</b></div>
+                <div class="comm-stat">MESSAGES<b id="messageCount">0</b></div>
+            </div>
+
+            <div class="message-buttons">
+                <button id="sendV2VBtn" class="send-btn"
+                        onclick="sendV2VMessage()">
+                    📡 SEND V2V MESSAGE
+                </button>
+
+                <button id="sendV2IBtn" class="send-btn"
+                        onclick="sendControlRoom()">
+                    🏢 SEND V2I MESSAGE
+                </button>
+            </div>
+
+            <div class="comm-history" id="commHistory">
+                <div style="font-size:10px;color:#718b94;padding:5px">
+                    Communication history will appear here...
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- =====================================================
+         REAL MAP
+    ====================================================== -->
+
+    <div class="panel map-panel">
+
+        <div class="panel-title">
+
+            Bailadila Mining Map
+
+            <span style="color:#20d889">
+                GPS LOCKED
+            </span>
+
+        </div>
+
+
+        <div id="mineMap"></div>
+
+
+        <div
+            style="
+            padding:6px 9px;
+            font-size:8px;
+            color:#83939e;
+            line-height:1.6;">
+
+            Vehicle:
+            <span id="gpsText">
+                18.62600° N,
+                81.24500° E
+            </span>
+
+            <br>
+
+            <button
+                class="small-btn"
+                onclick="toggleMapFollow()">
+
+                📍 FOLLOW VEHICLE
+
+            </button>
+
+            <button
+                class="small-btn"
+                onclick="showRoute()">
+
+                🛣 ROUTE
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         V2X VEHICLES
+    ====================================================== -->
+
+    <div class="panel">
+
+        <div class="panel-title">
+
+            Nearby Vehicles
+
+            <span>
+                3 LINKED
+            </span>
+
+        </div>
+
+
+        <div class="sensor-list">
+
+
+            <div class="sensor">
+
+                <span>
+                    🚚 D-04
+                </span>
+
+                <span
+                    style="color:#20d889">
+
+                    38 m
+
+                </span>
+
+            </div>
+
+
+            <div class="sensor">
+
+                <span>
+                    🚚 D-11
+                </span>
+
+                <span
+                    style="color:#20d889">
+
+                    64 m
+
+                </span>
+
+            </div>
+
+
+            <div class="sensor">
+
+                <span>
+                    📡 R-03
+                </span>
+
+                <span
+                    style="color:#35a9ff">
+
+                    118 m
+
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         EMERGENCY
+    ====================================================== -->
+
+    <div class="emergency">
+
+        <div
+            style="
+            font-size:10px;
+            font-weight:bold;">
+
+            EMERGENCY CONTROL
+
+        </div>
+
+
+        <div
+            style="
+            color:#997b82;
+            font-size:8px;
+            margin-top:3px;">
+
+            Demo interface — connect this control
+            to your ESP32/Raspberry Pi safety controller
+            before real vehicle deployment.
+
+        </div>
+
+
+        <button
+            onclick="emergencyStop()">
+
+            🛑 EMERGENCY STOP / ALERT
+
+        </button>
+
+
+        <button
+            class="reset-btn"
+            onclick="resetSystem()">
+
+            ↻ RESET VEHICLE SYSTEM
+
+        </button>
+
+    </div>
+
+
+    <!-- =====================================================
+         EVENT LOG
+    ====================================================== -->
+
+    <div class="panel">
+
+        <div class="panel-title">
+
+            Event History
+
+            <button
+                onclick="clearLog()"
+                style="
+                background:none;
+                border:0;
+                color:#54a8ce;
+                cursor:pointer;
+                font-size:8px;">
+
+                CLEAR
+
+            </button>
+
+        </div>
+
+
+        <div
+            class="log"
+            id="eventLog">
+
+            <div class="log-item">
+
+                <span class="log-time">
+                    SYSTEM
+                </span>
+
+                FogGuard initialized
+
+            </div>
+
+            <div class="log-item">
+
+                <span class="log-time">
+                    SYSTEM
+                </span>
+
+                3D LiDAR perception active
+
+            </div>
+
+            <div class="log-item">
+
+                <span class="log-time">
+                    SYSTEM
+                </span>
+
+                Bailadila map loaded
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+</main>
+
+
+<!-- =========================================================
+     SYSTEM MODAL
+========================================================= -->
+
+<div
+    class="modal"
+    id="systemModal">
+
+    <div class="modal-box">
+
+        <h2>
+            FogGuard System
+        </h2>
+
+        <p>
+
+            <b>Vehicle:</b> D-07
+            <br>
+
+            <b>Processing:</b> Raspberry Pi 5
+            <br>
+
+            <b>Controller:</b> ESP32
+            <br>
+
+            <b>AI Vision:</b> Camera + YOLO / OpenCV
+            <br>
+
+            <b>3D Perception:</b> LiDAR
+            <br>
+
+            <b>Radar:</b> mmWave
+            <br>
+
+            <b>Position:</b> GPS / DGPS + IMU
+            <br>
+
+            <b>Communication:</b> V2V / V2I
+            <br>
+
+            <b>Dashboard:</b> Driver Assistance
+            <br>
+
+            <b>Mining Region:</b> Bailadila / Kirandul
+            <br>
+
+            <b>System Mode:</b>
+            Offline-capable safety network
+
+        </p>
+
+
+        <button
+            class="close-modal"
+            onclick="closeSystemInfo()">
+
+            CLOSE
+
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   GLOBAL VARIABLES
+========================================================= */
+
+let speed = 18;
+
+let visibility = 86;
+
+let distance = 38;
+
+let rpm = 1480;
+
+let fuel = 72;
+
+let temperature = 76;
+
+let emergency = false;
+
+let mapFollow = false;
+
+let routeVisible = false;
+
+let pointCloudVisible = true;
+
+let horn = false;
+
+let lights = false;
+
+let beacon = false;
+
+let alarm = false;
+
+let lidarEnabled = true;
+
+let radarEnabled = true;
+
+let cameraEnabled = true;
+
+
+/* =========================================================
+   THREE.JS VARIABLES
+========================================================= */
+
+let scene;
+
+let camera3D;
+
+let renderer;
+
+let terrainPoints;
+
+let obstacleGroup;
+
+
+/* =========================================================
+   RANDOM
+========================================================= */
+
+function random(min,max){
+
+    return Math.floor(
+        Math.random() *
+        (max-min+1)
+    ) + min;
+
+}
+
+
+/* =========================================================
+   TIME
+========================================================= */
+
+function timeNow(){
+
+    return new Date()
+    .toLocaleTimeString(
+        "en-IN",
+        {
+            hour12:false
+        }
+    );
+
+}
+
+
+/* =========================================================
+   EVENT LOG
+========================================================= */
+
+function addLog(message){
+
+    const log =
+        document.getElementById(
+            "eventLog"
+        );
+
+    const item =
+        document.createElement(
+            "div"
+        );
+
+    item.className="log-item";
+
+    item.innerHTML=
+        `
+        <span class="log-time">
+        ${timeNow()}
+        </span>
+
+        ${message}
+        `;
+
+    log.prepend(item);
+
+    if(log.children.length > 15){
+
+        log.removeChild(
+            log.lastChild
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   FULLSCREEN
+========================================================= */
+
+function toggleFullscreen(){
+
+    if(!document.fullscreenElement){
+
+        document.documentElement
+        .requestFullscreen();
+
+    }
+
+    else{
+
+        document.exitFullscreen();
+
+    }
+
+}
+
+
+/* =========================================================
+   VEHICLE CONTROLS
+========================================================= */
+
+function toggleHorn(){
+
+    horn=!horn;
+
+    const btn=
+        document.getElementById(
+            "hornBtn"
+        );
+
+    btn.classList.toggle(
+        "active",
+        horn
+    );
+
+    addLog(
+        horn
+        ?
+        "Horn activated"
+        :
+        "Horn deactivated"
+    );
+
+}
+
+
+function toggleLights(){
+
+    lights=!lights;
+
+    const btn=
+        document.getElementById(
+            "lightBtn"
+        );
+
+    btn.classList.toggle(
+        "active",
+        lights
+    );
+
+    addLog(
+        lights
+        ?
+        "Headlights ON"
+        :
+        "Headlights OFF"
+    );
+
+}
+
+
+function toggleBeacon(){
+
+    beacon=!beacon;
+
+    const btn=
+        document.getElementById(
+            "beaconBtn"
+        );
+
+    btn.classList.toggle(
+        "warning-active",
+        beacon
+    );
+
+    addLog(
+        beacon
+        ?
+        "Warning beacon ON"
+        :
+        "Warning beacon OFF"
+    );
+
+}
+
+
+function toggleAlarm(){
+
+    alarm=!alarm;
+
+    const btn=
+        document.getElementById(
+            "alarmBtn"
+        );
+
+    btn.classList.toggle(
+        "danger-active",
+        alarm
+    );
+
+    addLog(
+        alarm
+        ?
+        "Vehicle alarm ON"
+        :
+        "Vehicle alarm OFF"
+    );
+
+}
+
+
+/* =========================================================
+   SPEED CONTROL
+========================================================= */
+
+function changeSpeed(amount){
+
+    if(emergency)
+        return;
+
+    speed += amount;
+
+    speed =
+        Math.max(
+            0,
+            Math.min(
+                40,
+                speed
+            )
+        );
+
+    document.getElementById(
+        "speed"
+    ).innerText =
+        speed;
+
+    addLog(
+        "Driver speed command: "+
+        speed+
+        " km/h"
+    );
+
+}
+
+
+/* =========================================================
+   DRIVE MODE
+========================================================= */
+
+function changeDriveMode(){
+
+    const mode=
+        document.getElementById(
+            "driveMode"
+        ).value;
+
+    addLog(
+        "Driving mode changed to "+
+        mode
+    );
+
+}
+
+
+/* =========================================================
+   CAMERA MODE
+========================================================= */
+
+const cameraModes=[
+    "FRONT",
+    "WIDE ANGLE",
+    "NIGHT VISION",
+    "PERCEPTION"
+];
+
+let cameraIndex=0;
+
+
+function cameraMode(){
+
+    cameraIndex++;
+
+    if(cameraIndex>=cameraModes.length)
+        cameraIndex=0;
+
+    document.getElementById(
+        "cameraModeText"
+    ).innerText=
+        cameraModes[cameraIndex];
+
+    addLog(
+        "Camera mode: "+
+        cameraModes[cameraIndex]
+    );
+
+}
+
+
+/* =========================================================
+   SENSOR TOGGLE
+========================================================= */
+
+function toggleSensor(sensor){
+
+    let enabled;
+
+    let btn;
+
+    if(sensor==="lidar"){
+
+        lidarEnabled=!lidarEnabled;
+
+        enabled=lidarEnabled;
+
+        btn=
+            document.getElementById(
+                "lidarBtn"
+            );
+
+        document.getElementById(
+            "lidarDot"
+        ).className=
+            "sensor-dot "+
+            (
+                enabled
+                ?
+                "online"
+                :
+                "offline"
+            );
+
+        document.getElementById(
+            "lidarState"
+        ).innerText=
+            enabled
+            ?
+            "ONLINE"
+            :
+            "OFFLINE";
+
+    }
+
+
+    if(sensor==="radar"){
+
+        radarEnabled=!radarEnabled;
+
+        enabled=radarEnabled;
+
+        btn=
+            document.getElementById(
+                "radarBtn"
+            );
+
+        document.getElementById(
+            "radarDot"
+        ).className=
+            "sensor-dot "+
+            (
+                enabled
+                ?
+                "online"
+                :
+                "offline"
+            );
+
+        document.getElementById(
+            "radarState"
+        ).innerText=
+            enabled
+            ?
+            "ONLINE"
+            :
+            "OFFLINE";
+
+    }
+
+
+    if(sensor==="camera"){
+
+        cameraEnabled=!cameraEnabled;
+
+        enabled=cameraEnabled;
+
+        btn=
+            document.getElementById(
+                "cameraBtn"
+            );
+
+        document.getElementById(
+            "cameraDot"
+        ).className=
+            "sensor-dot "+
+            (
+                enabled
+                ?
+                "online"
+                :
+                "offline"
+            );
+
+    }
+
+
+    btn.classList.toggle(
+        "active",
+        enabled
+    );
+
+
+    addLog(
+        sensor.toUpperCase()+
+        " "+
+        (
+            enabled
+            ?
+            "enabled"
+            :
+            "disabled"
+        )
+    );
+
+}
+
+
+/* =========================================================
+   SENSOR TEST
+========================================================= */
+
+function runSensorTest(){
+
+    addLog(
+        "Running complete sensor self-test..."
+    );
+
+    setTimeout(
+        function(){
+
+            addLog(
+                "LiDAR: PASS"
+            );
+
+            addLog(
+                "mmWave Radar: PASS"
+            );
+
+            addLog(
+                "Camera: PASS"
+            );
+
+            addLog(
+                "GPS/DGPS: PASS"
+            );
+
+            addLog(
+                "IMU: PASS"
+            );
+
+            addLog(
+                "ESP32: PASS"
+            );
+
+        },
+        700
+    );
+
+}
+
+
+function runSystemTest(){
+
+    addLog(
+        "SYSTEM DIAGNOSTIC STARTED"
+    );
+
+    runSensorTest();
+
+    setTimeout(
+        function(){
+
+            showBanner(
+                "SYSTEM TEST COMPLETE — ALL DEMO MODULES READY"
+            );
+
+        },
+        1600
+    );
+
+}
+
+
+/* =========================================================
+   ALERT ENGINE
+========================================================= */
+
+function setAlert(
+    level,
+    title,
+    text
+){
+
+    const box=
+        document.getElementById(
+            "alertBox"
+        );
+
+    const levelText=
+        document.getElementById(
+            "alertLevel"
+        );
+
+    const titleEl=
+        document.getElementById(
+            "alertTitle"
+        );
+
+    const textEl=
+        document.getElementById(
+            "alertText"
+        );
+
+    const icon=
+        document.getElementById(
+            "alertIcon"
+        );
+
+    box.className=
+        "alert "+
+        (
+            level==="WARNING"
+            ?
+            "warning"
+            :
+            level==="CRITICAL"
+            ?
+            "danger"
+            :
+            ""
+        );
+
+
+    levelText.innerText=
+        level;
+
+
+    if(level==="SAFE"){
+
+        levelText.style.color=
+            "#20d889";
+
+        icon.innerText="✓";
+
+    }
+
+    else if(level==="WARNING"){
+
+        levelText.style.color=
+            "#ffc83d";
+
+        icon.innerText="⚠";
+
+    }
+
+    else{
+
+        levelText.style.color=
+            "#ff4657";
+
+        icon.innerText="🛑";
+
+    }
+
+
+    titleEl.innerText=
+        title;
+
+    textEl.innerText=
+        text;
+
+}
+
+
+/* =========================================================
+   FOG ALERT
+========================================================= */
+
+function simulateFog(){
+
+    visibility=22;
+
+    setAlert(
+        "WARNING",
+        "DENSE FOG DETECTED",
+        "Visibility has dropped significantly. Reduce speed and maintain increased following distance."
+    );
+
+    showBanner(
+        "DENSE FOG — REDUCE SPEED"
+    );
+
+    addLog(
+        "Fog warning triggered"
+    );
+
+}
+
+
+/* =========================================================
+   OBSTACLE
+========================================================= */
+
+function simulateObstacle(){
+
+    distance=14;
+
+    setAlert(
+        "CRITICAL",
+        "OBSTACLE INSIDE SAFETY ZONE",
+        "LiDAR/mmWave detection indicates a vehicle or obstacle at critical following distance."
+    );
+
+    showBanner(
+        "CRITICAL OBSTACLE — TAKE ACTION"
+    );
+
+    document.getElementById(
+        "detect1"
+    ).style.borderColor=
+        "#ff4657";
+
+    addLog(
+        "Critical obstacle detected at 14m"
+    );
+
+}
+
+
+/* =========================================================
+   OVERSPEED
+========================================================= */
+
+function simulateOverspeed(){
+
+    speed=35;
+
+    setAlert(
+        "WARNING",
+        "OVERSPEED DETECTED",
+        "Current vehicle speed exceeds the recommended speed for present visibility conditions."
+    );
+
+    showBanner(
+        "OVERSPEED — REDUCE SPEED"
+    );
+
+    addLog(
+        "Overspeed warning triggered"
+    );
+
+}
+
+
+/* =========================================================
+   CLEAR
+========================================================= */
+
+function clearHazard(){
+
+    visibility=86;
+
+    distance=38;
+
+    speed=18;
+
+    setAlert(
+        "SAFE",
+        "SAFE TO PROCEED",
+        "All perception systems indicate safe forward movement."
+    );
+
+    document.getElementById(
+        "detect1"
+    ).style.borderColor=
+        "#ffc83d";
+
+    addLog(
+        "Safety condition cleared"
+    );
+
+}
+
+
+/* =========================================================
+   ACKNOWLEDGE
+========================================================= */
+
+function acknowledgeAlert(){
+
+    addLog(
+        "Driver acknowledged current alert"
+    );
+
+    showBanner(
+        "ALERT ACKNOWLEDGED"
+    );
+
+}
+
+
+/* =========================================================
+   V2V / V2I COMMUNICATION ENGINE
+========================================================= */
+
+let commMode = "V2V";
+let communicationCount = 0;
+
+function getMessageText(){
+    const type = document.getElementById("messageType").value;
+    const custom = document.getElementById("customMessage").value.trim();
+    return custom || type;
+}
+
+function addCommunicationHistory(channel, target, message){
+    communicationCount++;
+
+    const countEl = document.getElementById("messageCount");
+    if(countEl) countEl.innerText = communicationCount;
+
+    const history = document.getElementById("commHistory");
+    if(!history) return;
+
+    if(history.children.length === 1 &&
+       history.children[0].innerText.includes("Communication history")){
+        history.innerHTML = "";
+    }
+
+    const row = document.createElement("div");
+    row.className = "comm-history-row";
+    row.innerHTML =
+        '<span class="tx">TX</span>' +
+        '<span class="channel">' + channel + '</span>' +
+        '<span class="msg">' + target + ' • ' + message + '</span>';
+
+    history.prepend(row);
+
+    while(history.children.length > 12){
+        history.removeChild(history.lastChild);
+    }
+}
+
+function setCommMode(mode){
+    commMode = mode;
+
+    document.getElementById("v2vModeBtn").classList.toggle("active", mode==="V2V");
+    document.getElementById("v2iModeBtn").classList.toggle("active", mode==="V2I");
+
+    const target = document.getElementById("messageTarget");
+    if(mode === "V2I"){
+        target.value = "CONTROL";
+        document.getElementById("messageStatus").innerText = "V2I READY";
+        addLog("V2I communication channel selected");
+    }else{
+        if(target.value === "CONTROL") target.value = "ALL";
+        document.getElementById("messageStatus").innerText = "V2V READY";
+        addLog("V2V communication channel selected");
+    }
+}
+
+function sendV2VMessage(){
+    const target = document.getElementById("messageTarget").value;
+    const message = getMessageText();
+    const status = document.getElementById("messageStatus");
+
+    if(target === "CONTROL"){
+        showBanner("SELECT A VEHICLE FOR V2V");
+        addLog("V2V blocked: CONTROL ROOM is a V2I target");
+        return;
+    }
+
+    status.innerText = "V2V SENDING...";
+
+    addLog("V2V TX → " + target + ": " + message);
+    addCommunicationHistory("V2V", target, message);
+
+    setTimeout(function(){
+        status.innerText = "V2V SENT";
+        showBanner("📡 V2V MESSAGE SENT → " + target);
+    }, 500);
+}
+
+function sendControlRoom(){
+    const message = getMessageText();
+    const status = document.getElementById("messageStatus");
+
+    status.innerText = "V2I UPLINK...";
+
+    addLog("V2I TX → CONTROL ROOM: " + message);
+    addCommunicationHistory("V2I", "CONTROL ROOM", message);
+
+    setTimeout(function(){
+        status.innerText = "V2I DELIVERED";
+        showBanner("🏢 V2I MESSAGE DELIVERED TO CONTROL ROOM");
+    }, 600);
+}
+
+function sendSelectedMessage(){
+    const target = document.getElementById("messageTarget").value;
+
+    if(target === "CONTROL"){
+        setCommMode("V2I");
+        sendControlRoom();
+    }else{
+        setCommMode("V2V");
+        sendV2VMessage();
+    }
+}
+
+/* =========================================================
+   EMERGENCY COMMUNICATION
+========================================================= */
+
+function sendEmergencyMessage(){
+    addLog("V2V TX → ALL NEARBY VEHICLES: EMERGENCY ALERT");
+    addCommunicationHistory("V2V", "ALL VEHICLES", "EMERGENCY ALERT");
+
+    addLog("V2I TX → CONTROL ROOM: EMERGENCY ALERT");
+    addCommunicationHistory("V2I", "CONTROL ROOM", "EMERGENCY ALERT");
+
+    communicationCount += 2;
+    document.getElementById("messageCount").innerText = communicationCount;
+
+    showBanner("🚨 V2V + V2I EMERGENCY ALERT TRANSMITTED");
+}
+
+/* =========================================================
+   BANNER
+========================================================= */
+
+let bannerTimer;
+
+
+function showBanner(text){
+
+    const banner=
+        document.getElementById(
+            "alertBanner"
+        );
+
+    document.getElementById(
+        "bannerText"
+    ).innerText=
+        text;
+
+    banner.classList.add(
+        "show"
+    );
+
+
+    clearTimeout(
+        bannerTimer
+    );
+
+
+    bannerTimer=
+        setTimeout(
+            function(){
+
+                banner.classList.remove(
+                    "show"
+                );
+
+            },
+            3000
+        );
+
+}
+
+
+/* =========================================================
+   EMERGENCY
+========================================================= */
+
+function emergencyStop(){
+
+    emergency=true;
+
+    speed=0;
+
+
+    document.getElementById(
+        "speed"
+    ).innerText=
+        "0";
+
+
+    setAlert(
+        "CRITICAL",
+        "EMERGENCY STOP ACTIVATED",
+        "Vehicle emergency state activated. Emergency message should be transmitted to the control system."
+    );
+
+
+    document.getElementById(
+        "vehicleStatus"
+    ).innerText=
+        "● EMERGENCY";
+
+
+    document.getElementById(
+        "vehicleStatus"
+    ).style.color=
+        "#ff4657";
+
+
+    addLog(
+        "!!! EMERGENCY STOP ACTIVATED !!!"
+    );
+
+
+    sendEmergencyMessage();
+
+}
+
+
+/* =========================================================
+   EMERGENCY MESSAGE
+========================================================= */
+
+function sendEmergencyMessage(){
+
+    addLog(
+        "V2V → EMERGENCY ALERT"
+    );
+
+    addLog(
+        "V2I → CONTROL ROOM EMERGENCY"
+    );
+
+    showBanner(
+        "🚨 EMERGENCY ALERT TRANSMITTED"
+    );
+
+}
+
+
+/* =========================================================
+   RESET
+========================================================= */
+
+function resetSystem(){
+
+    emergency=false;
+
+    speed=18;
+
+    visibility=86;
+
+    distance=38;
+
+
+    document.getElementById(
+        "speed"
+    ).innerText=
+        speed;
+
+
+    document.getElementById(
+        "vehicleStatus"
+    ).innerText=
+        "● ONLINE";
+
+
+    document.getElementById(
+        "vehicleStatus"
+    ).style.color=
+        "#20d889";
+
+
+    clearHazard();
+
+    addLog(
+        "Vehicle safety system reset"
+    );
+
+}
+
+
+/* =========================================================
+   3D VEHICLE SURROUND VIEW
+   Movable / draggable / zoomable Three.js scene
+========================================================= */
+
+let surroundVehicle;
+let surroundingVehicles=[];
+let hazardObjects=[];
+let radarRings=[];
+let scanBeam;
+let autoRotate=false;
+let orbitYaw=0.35;
+let orbitPitch=0.48;
+let orbitDistance=55;
+let dragging3D=false;
+let lastPointerX=0;
+let lastPointerY=0;
+
+function initLidar(){
+
+    const canvas=document.getElementById("lidarCanvas");
+    const container=document.getElementById("lidarView");
+
+    scene=new THREE.Scene();
+    scene.background=new THREE.Color(0x05090d);
+
+    camera3D=new THREE.PerspectiveCamera(
+        55,
+        container.clientWidth/container.clientHeight,
+        .1,
+        500
+    );
+
+    renderer=new THREE.WebGLRenderer({
+        canvas:canvas,
+        antialias:true
+    });
+
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+    renderer.setSize(container.clientWidth,container.clientHeight);
+
+    scene.add(new THREE.AmbientLight(0xffffff,.65));
+
+    const keyLight=new THREE.DirectionalLight(0xffffff,.8);
+    keyLight.position.set(30,50,20);
+    scene.add(keyLight);
+
+    const grid=new THREE.GridHelper(
+        160,32,0x1d5262,0x102731
+    );
+    grid.position.y=-3.5;
+    scene.add(grid);
+
+    createSurroundTerrain();
+    createMainVehicle();
+    createSurroundingVehicles();
+    createHazards();
+    createRadarZones();
+    createScanBeam();
+    setup3DInteraction();
+    update3DCamera();
+
+    animateLidar();
+}
+
+function createSurroundTerrain(){
+
+    const geometry=new THREE.BufferGeometry();
+    const points=[];
+    const colors=[];
+
+    for(let i=0;i<22000;i++){
+
+        const x=(Math.random()-.5)*140;
+        const z=(Math.random()-.5)*110;
+        const road=Math.abs(x)<8;
+
+        let y=-3.1 + (Math.random()-.5)*1.5;
+
+        if(!road){
+            const radial=Math.sqrt(x*x+z*z);
+            y += Math.max(0,7-radial*.05);
+        }
+
+        points.push(x,y,z);
+
+        const c=new THREE.Color();
+        if(road) c.setHSL(.55,.9,.42);
+        else c.setHSL(.18+Math.random()*.12,.8,.32+.15*Math.random());
+
+        colors.push(c.r,c.g,c.b);
+    }
+
+    geometry.setAttribute(
+        "position",
+        new THREE.Float32BufferAttribute(points,3)
+    );
+
+    geometry.setAttribute(
+        "color",
+        new THREE.Float32BufferAttribute(colors,3)
+    );
+
+    const material=new THREE.PointsMaterial({
+        size:.34,
+        vertexColors:true,
+        transparent:true,
+        opacity:.9
+    });
+
+    terrainPoints=new THREE.Points(geometry,material);
+    scene.add(terrainPoints);
+
+    // Road lanes
+    const road=new THREE.Mesh(
+        new THREE.PlaneGeometry(16,140),
+        new THREE.MeshBasicMaterial({
+            color:0x182229,
+            transparent:true,
+            opacity:.85
+        })
+    );
+    road.rotation.x=-Math.PI/2;
+    road.position.y=-3.45;
+    scene.add(road);
+
+    for(let x of [-5,5]){
+        const lane=new THREE.Mesh(
+            new THREE.PlaneGeometry(.15,140),
+            new THREE.MeshBasicMaterial({color:0x9aa9ad})
+        );
+        lane.rotation.x=-Math.PI/2;
+        lane.position.set(x,-3.35,0);
+        scene.add(lane);
+    }
+}
+
+function buildDumper(color=0xffca3d){
+
+    const group=new THREE.Group();
+
+    const body=new THREE.Mesh(
+        new THREE.BoxGeometry(5,2.3,8),
+        new THREE.MeshPhongMaterial({
+            color:color,
+            emissive:0x241900,
+            shininess:70
+        })
+    );
+    body.position.y=1.15;
+
+    const cabin=new THREE.Mesh(
+        new THREE.BoxGeometry(4,2.5,3),
+        new THREE.MeshPhongMaterial({
+            color:0xd5dde2,
+            transparent:true,
+            opacity:.95
+        })
+    );
+    cabin.position.set(0,3.25,1.1);
+
+    const bed=new THREE.Mesh(
+        new THREE.BoxGeometry(4.7,2.1,4.2),
+        new THREE.MeshPhongMaterial({color:0x8d681d})
+    );
+    bed.position.set(0,2.6,-1.3);
+    bed.rotation.x=-.08;
+
+    group.add(body,cabin,bed);
+
+    // wheels
+    for(const x of [-2.35,2.35]){
+        for(const z of [-2.7,2.4]){
+            const wheel=new THREE.Mesh(
+                new THREE.CylinderGeometry(1.0,1.0,.55,16),
+                new THREE.MeshPhongMaterial({color:0x111417})
+            );
+            wheel.rotation.z=Math.PI/2;
+            wheel.position.set(x,.35,z);
+            group.add(wheel);
+        }
+    }
+
+    return group;
+}
+
+function createMainVehicle(){
+
+    surroundVehicle=buildDumper(0xffca3d);
+    surroundVehicle.position.set(0,-3.1,8);
+    scene.add(surroundVehicle);
+
+    const beacon=new THREE.Mesh(
+        new THREE.SphereGeometry(.35,12,12),
+        new THREE.MeshBasicMaterial({color:0xff303f})
+    );
+    beacon.position.set(0,4.65,8);
+    beacon.userData.isBeacon=true;
+    scene.add(beacon);
+    surroundVehicle.userData.beacon=beacon;
+
+    // Safety halo around the vehicle
+    const halo=new THREE.Mesh(
+        new THREE.RingGeometry(8.5,9,.1,64),
+        new THREE.MeshBasicMaterial({
+            color:0x20d889,
+            transparent:true,
+            opacity:.35,
+            side:THREE.DoubleSide
+        })
+    );
+    halo.rotation.x=-Math.PI/2;
+    halo.position.set(0,-3.25,8);
+    scene.add(halo);
+    surroundVehicle.userData.halo=halo;
+}
+
+function createSurroundingVehicles(){
+
+    const data=[
+        {id:"D-04",x:-13,z:-17,color:0xffc83d,speed:.018},
+        {id:"D-11",x:14,z:-32,color:0xffc83d,speed:.024},
+        {id:"R-03",x:18,z:7,color:0x35a9ff,speed:.014}
+    ];
+
+    data.forEach((d,i)=>{
+
+        const v=buildDumper(d.color);
+        v.scale.set(.72,.72,.72);
+        v.position.set(d.x,-3.1,d.z);
+        v.userData={
+            id:d.id,
+            baseX:d.x,
+            baseZ:d.z,
+            phase:i*2.2,
+            speed:d.speed
+        };
+
+        scene.add(v);
+        surroundingVehicles.push(v);
+
+        const label=create3DLabel(d.id);
+        label.position.set(d.x,3.2,d.z);
+        scene.add(label);
+        v.userData.label=label;
+    });
+}
+
+function create3DLabel(text){
+
+    const canvas=document.createElement("canvas");
+    canvas.width=256;
+    canvas.height=64;
+
+    const ctx=canvas.getContext("2d");
+    ctx.fillStyle="rgba(5,12,17,.9)";
+    ctx.fillRect(0,0,256,64);
+    ctx.strokeStyle="#35a9ff";
+    ctx.strokeRect(1,1,254,62);
+    ctx.font="bold 26px Arial";
+    ctx.fillStyle="#e9f2f7";
+    ctx.fillText(text,12,40);
+
+    const texture=new THREE.CanvasTexture(canvas);
+    const sprite=new THREE.Sprite(
+        new THREE.SpriteMaterial({
+            map:texture,
+            transparent:true,
+            depthTest:false
+        })
+    );
+    sprite.scale.set(7,1.75,1);
+
+    return sprite;
+}
+
+function createHazards(){
+
+    const positions=[
+        {x:7,z:-9,type:"ROCK"},
+        {x:-8,z:-28,type:"OBSTACLE"},
+        {x:8,z:-43,type:"HAZARD"}
+    ];
+
+    positions.forEach((p,i)=>{
+
+        const mesh=new THREE.Mesh(
+            new THREE.IcosahedronGeometry(i===1?1.7:1.2,1),
+            new THREE.MeshPhongMaterial({
+                color:0xff4657,
+                emissive:0x4a0710
+            })
+        );
+
+        mesh.position.set(p.x,-2.0,p.z);
+        mesh.userData={type:p.type,phase:i};
+        scene.add(mesh);
+        hazardObjects.push(mesh);
+
+        const ring=new THREE.Mesh(
+            new THREE.RingGeometry(1.8,2.05,32),
+            new THREE.MeshBasicMaterial({
+                color:0xff4657,
+                transparent:true,
+                opacity:.55,
+                side:THREE.DoubleSide
+            })
+        );
+        ring.rotation.x=-Math.PI/2;
+        ring.position.set(p.x,-3.2,p.z);
+        scene.add(ring);
+        mesh.userData.ring=ring;
+    });
+}
+
+function createRadarZones(){
+
+    [10,17,24].forEach((r,i)=>{
+
+        const ring=new THREE.Mesh(
+            new THREE.RingGeometry(r-.08,r,.1,96),
+            new THREE.MeshBasicMaterial({
+                color:0x21d9e8,
+                transparent:true,
+                opacity:.28-i*.06,
+                side:THREE.DoubleSide
+            })
+        );
+
+        ring.rotation.x=-Math.PI/2;
+        ring.position.set(0,-3.2,8);
+        scene.add(ring);
+        radarRings.push(ring);
+    });
+}
+
+function createScanBeam(){
+
+    const geometry=new THREE.ConeGeometry(
+        23,1.2,32,1,true
+    );
+
+    scanBeam=new THREE.Mesh(
+        geometry,
+        new THREE.MeshBasicMaterial({
+            color:0x21d9e8,
+            transparent:true,
+            opacity:.10,
+            side:THREE.DoubleSide,
+            depthWrite:false
+        })
+    );
+
+    scanBeam.rotation.x=Math.PI/2;
+    scanBeam.position.set(0,-2.9,8);
+    scene.add(scanBeam);
+}
+
+function setup3DInteraction(){
+
+    const canvas=document.getElementById("lidarCanvas");
+
+    canvas.addEventListener("pointerdown",e=>{
+        dragging3D=true;
+        lastPointerX=e.clientX;
+        lastPointerY=e.clientY;
+        canvas.classList.add("dragging");
+        canvas.setPointerCapture(e.pointerId);
+    });
+
+    canvas.addEventListener("pointermove",e=>{
+
+        if(!dragging3D) return;
+
+        const dx=e.clientX-lastPointerX;
+        const dy=e.clientY-lastPointerY;
+
+        orbitYaw-=dx*.008;
+        orbitPitch-=dy*.006;
+
+        orbitPitch=THREE.MathUtils.clamp(
+            orbitPitch,.15,1.35
+        );
+
+        lastPointerX=e.clientX;
+        lastPointerY=e.clientY;
+
+        update3DCamera();
+    });
+
+    const stopDrag=()=>{
+        dragging3D=false;
+        canvas.classList.remove("dragging");
+    };
+
+    canvas.addEventListener("pointerup",stopDrag);
+    canvas.addEventListener("pointercancel",stopDrag);
+    canvas.addEventListener("wheel",e=>{
+        e.preventDefault();
+        orbitDistance+=e.deltaY*.045;
+        orbitDistance=THREE.MathUtils.clamp(
+            orbitDistance,22,95
+        );
+        update3DCamera();
+    },{passive:false});
+}
+
+function update3DCamera(){
+
+    if(!camera3D) return;
+
+    const target=new THREE.Vector3(0,-1,8);
+
+    const cp=Math.cos(orbitPitch);
+    camera3D.position.set(
+        target.x+Math.sin(orbitYaw)*cp*orbitDistance,
+        target.y+Math.sin(orbitPitch)*orbitDistance,
+        target.z+Math.cos(orbitYaw)*cp*orbitDistance
+    );
+
+    camera3D.lookAt(target);
+}
+
+function animateLidar(){
+
+    requestAnimationFrame(animateLidar);
+
+    const t=Date.now()*.001;
+
+    if(autoRotate && !dragging3D){
+        orbitYaw+=.003;
+        update3DCamera();
+    }
+
+    if(terrainPoints && pointCloudVisible && lidarEnabled){
+        terrainPoints.rotation.y+=.00008;
+    }
+
+    surroundingVehicles.forEach(v=>{
+
+        const d=v.userData;
+
+        v.position.x=
+            d.baseX+
+            Math.sin(t*d.speed*25+d.phase)*3;
+
+        v.position.z=
+            d.baseZ+
+            Math.cos(t*d.speed*18+d.phase)*2;
+
+        v.rotation.y=
+            Math.sin(t*d.speed*20+d.phase)*.12;
+
+        if(v.userData.label){
+            v.userData.label.position.set(
+                v.position.x,
+                v.position.y+7,
+                v.position.z
+            );
+        }
+    });
+
+    hazardObjects.forEach((h,i)=>{
+
+        h.rotation.y+=.012;
+        const pulse=1+Math.sin(t*3+i)*.08;
+        h.scale.setScalar(pulse);
+
+        if(h.userData.ring){
+            h.userData.ring.scale.setScalar(
+                1+Math.sin(t*2+i)*.12
+            );
+        }
+    });
+
+    radarRings.forEach((r,i)=>{
+        r.rotation.z=t*.05*(i+1);
+    });
+
+    if(scanBeam){
+        scanBeam.rotation.z=t*.8;
+    }
+
+    if(surroundVehicle){
+
+        const beacon=surroundVehicle.userData.beacon;
+        const halo=surroundVehicle.userData.halo;
+
+        if(beacon){
+            beacon.visible=true;
+            beacon.material.opacity=
+                .45+.55*(Math.sin(t*6)*.5+.5);
+        }
+
+        if(halo){
+            halo.scale.setScalar(
+                1+.04*Math.sin(t*2)
+            );
+        }
+    }
+
+    renderer.render(scene,camera3D);
+}
+
+function toggleAutoRotate(){
+
+    autoRotate=!autoRotate;
+
+    document.getElementById("autoRotateBtn").classList.toggle(
+        "active",
+        autoRotate
+    );
+
+    addLog(
+        "3D auto rotation "+
+        (autoRotate?"enabled":"disabled")
+    );
+}
+
+function set3DView(view){
+
+    if(view==="top"){
+        orbitYaw=0;
+        orbitPitch=1.35;
+        orbitDistance=48;
+    }
+    else if(view==="driver"){
+        orbitYaw=0;
+        orbitPitch=.42;
+        orbitDistance=38;
+    }
+
+    autoRotate=false;
+    document.getElementById("autoRotateBtn").classList.remove("active");
+    update3DCamera();
+
+    addLog("3D view: "+view.toUpperCase());
+}
+
+function togglePointCloud(){
+
+    pointCloudVisible=!pointCloudVisible;
+
+    if(terrainPoints)
+        terrainPoints.visible=pointCloudVisible;
+
+    document.getElementById("lidarLive").innerText=
+        pointCloudVisible
+        ? "● LIVE 3D SURROUND"
+        : "○ 3D SURROUND HIDDEN";
+}
+
+function resetLidar(){
+
+    orbitYaw=.35;
+    orbitPitch=.48;
+    orbitDistance=55;
+    autoRotate=false;
+
+    document.getElementById("autoRotateBtn").classList.remove("active");
+
+    update3DCamera();
+
+    addLog("3D surround view reset");
+}
+
+
+/* =========================================================
+   MESSAGE TARGET / QUICK SEND
+========================================================= */
+
+function sendSelectedMessage(){
+
+    const target=document.getElementById("messageTarget").value;
+
+    if(target==="CONTROL"){
+        sendControlRoom();
+        return;
+    }
+
+    const type=document.getElementById("messageType").value;
+    const custom=document.getElementById("customMessage").value.trim();
+    const message=custom?custom:type;
+
+    const status=document.getElementById("messageStatus");
+    status.innerText="SENDING...";
+
+    addLog("V2V → "+target+": "+message);
+
+    setTimeout(()=>{
+
+        status.innerText="SENT";
+
+        showBanner(
+            "✉ MESSAGE SENT TO "+target
+        );
+
+    },500);
+}
+
+/* =========================================================
+   POINT CLOUD
+========================================================= */
+
+function togglePointCloud(){
+
+    pointCloudVisible=
+        !pointCloudVisible;
+
+
+    terrainPoints.visible=
+        pointCloudVisible;
+
+
+    document.getElementById(
+        "lidarLive"
+    ).innerText=
+        pointCloudVisible
+        ?
+        "● LIVE 3D SURROUND"
+        :
+        "○ 3D SURROUND HIDDEN";
+
+}
+
+
+/* =========================================================
+   RESET 3D
+========================================================= */
+
+function resetLidar(){
+
+    camera3D.position.set(
+        0,
+        32,
+        72
+    );
+
+    camera3D.lookAt(
+        0,
+        0,
+        -10
+    );
+
+    addLog(
+        "3D LiDAR view reset"
+    );
+
+}
+
+
+/* =========================================================
+   MAP
+========================================================= */
+
+let mineMap;
+
+let vehicleMarker;
+
+let haulRoute;
+
+
+const bailadilaCenter=[
+    18.6260,
+    81.2450
+];
+
+
+function initMap(){
+
+    mineMap=
+        L.map(
+            "mineMap"
+        )
+        .setView(
+            bailadilaCenter,
+            14
+        );
+
+
+    L.tileLayer(
+
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+
+        {
+
+            maxZoom:19,
+
+            attribution:
+                '&copy; OpenStreetMap contributors'
+
+        }
+
+    ).addTo(
+        mineMap
+    );
+
+
+    const icon=
+        L.divIcon({
+
+            className:
+                "vehicle-marker",
+
+            html:
+                `
+                <div style="
+                width:15px;
+                height:15px;
+                background:#20d889;
+                border:3px solid #06100d;
+                border-radius:50%;
+                box-shadow:0 0 12px #20d889;">
+                </div>
+                `,
+
+            iconSize:[
+                15,
+                15
+            ],
+
+            iconAnchor:[
+                7,
+                7
+            ]
+
+        });
+
+
+    vehicleMarker=
+        L.marker(
+            bailadilaCenter,
+            {
+                icon:icon
+            }
+        )
+        .addTo(
+            mineMap
+        )
+        .bindPopup(
+            `
+            <b>FOGGUARD D-07</b>
+            <br>
+            Mine Dumper
+            <br>
+            GPS: ACTIVE
+            <br>
+            V2X: CONNECTED
+            `
+        );
+
+
+    L.circle(
+
+        bailadilaCenter,
+
+        {
+
+            radius:1500,
+
+            color:"#ff4657",
+
+            weight:1,
+
+            dashArray:"5,5",
+
+            fillOpacity:.03
+
+        }
+
+    )
+    .addTo(
+        mineMap
+    )
+    .bindTooltip(
+        "Bailadila mining reference area"
+    );
+
+
+    addMapVehicle(
+        18.629,
+        81.247,
+        "D-04",
+        "#ffc83d"
+    );
+
+
+    addMapVehicle(
+        18.632,
+        81.249,
+        "D-11",
+        "#ffc83d"
+    );
+
+
+    addMapVehicle(
+        18.621,
+        81.243,
+        "R-03",
+        "#35a9ff"
+    );
+
+}
+
+
+/* =========================================================
+   MAP VEHICLES
+========================================================= */
+
+function addMapVehicle(
+    lat,
+    lon,
+    id,
+    color
+){
+
+    const icon=
+        L.divIcon({
+
+            className:"map-v",
+
+            html:
+                `
+                <div style="
+                width:11px;
+                height:11px;
+                background:${color};
+                border:2px solid #061017;
+                border-radius:50%;
+                box-shadow:0 0 8px ${color};">
+                </div>
+                `,
+
+            iconSize:[
+                11,
+                11
+            ],
+
+            iconAnchor:[
+                5,
+                5
+            ]
+
+        });
+
+
+    L.marker(
+        [lat,lon],
+        {icon:icon}
+    )
+    .addTo(
+        mineMap
+    )
+    .bindPopup(
+        `<b>${id}</b><br>
+        V2V linked vehicle`
+    );
+
+}
+
+
+/* =========================================================
+   MAP MOVEMENT
+========================================================= */
+
+function updateMapPosition(){
+
+    if(!vehicleMarker)
+        return;
+
+
+    const lat=
+        18.6260+
+        Math.sin(
+            Date.now()*.00003
+        )*.002;
+
+
+    const lon=
+        81.2450+
+        Math.cos(
+            Date.now()*.00003
+        )*.002;
+
+
+    vehicleMarker.setLatLng(
+        [lat,lon]
+    );
+
+
+    document.getElementById(
+        "gpsText"
+    ).innerText=
+        lat.toFixed(5)+
+        "° N, "+
+        lon.toFixed(5)+
+        "° E";
+
+
+    if(mapFollow){
+
+        mineMap.panTo(
+            [lat,lon],
+            {
+                animate:true,
+                duration:.5
+            }
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   MAP FOLLOW
+========================================================= */
+
+function toggleMapFollow(){
+
+    mapFollow=
+        !mapFollow;
+
+
+    addLog(
+        mapFollow
+        ?
+        "Map follow mode ON"
+        :
+        "Map follow mode OFF"
+    );
+
+
+    if(mapFollow &&
+       vehicleMarker){
+
+        mineMap.panTo(
+            vehicleMarker.getLatLng()
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   MAP ROUTE
+========================================================= */
+
+function showRoute(){
+
+    if(routeVisible){
+
+        mineMap.removeLayer(
+            haulRoute
+        );
+
+        routeVisible=false;
+
+        addLog(
+            "Haul route hidden"
+        );
+
+        return;
+
+    }
+
+
+    const route=[
+
+        [18.619,81.239],
+
+        [18.623,81.242],
+
+        [18.626,81.245],
+
+        [18.630,81.248],
+
+        [18.635,81.250]
+
+    ];
+
+
+    haulRoute=
+        L.polyline(
+            route,
+            {
+
+                color:"#20d9e8",
+
+                weight:4,
+
+                opacity:.9,
+
+                dashArray:"8,7"
+
+            }
+        )
+        .addTo(
+            mineMap
+        );
+
+
+    haulRoute.bindTooltip(
+        "Haul Road / Demo route"
+    );
+
+
+    routeVisible=true;
+
+
+    addLog(
+        "Haul route displayed"
+    );
+
+}
+
+
+/* =========================================================
+   SYSTEM MODAL
+========================================================= */
+
+function openSystemInfo(){
+
+    document.getElementById(
+        "systemModal"
+    ).style.display=
+        "flex";
+
+}
+
+
+function closeSystemInfo(){
+
+    document.getElementById(
+        "systemModal"
+    ).style.display=
+        "none";
+
+}
+
+
+/* =========================================================
+   LIVE TELEMETRY
+========================================================= */
+
+function updateTelemetry(){
+
+    if(emergency)
+        return;
+
+
+    speed +=
+        random(
+            -1,
+            1
+        );
+
+
+    speed=
+        Math.max(
+            5,
+            Math.min(
+                35,
+                speed
+            )
+        );
+
+
+    visibility +=
+        random(
+            -3,
+            3
+        );
+
+
+    visibility=
+        Math.max(
+            15,
+            Math.min(
+                100,
+                visibility
+            )
+        );
+
+
+    distance +=
+        random(
+            -3,
+            3
+        );
+
+
+    distance=
+        Math.max(
+            12,
+            Math.min(
+                90,
+                distance
+            )
+        );
+
+
+    rpm=
+        1200+
+        speed*25+
+        random(
+            -40,
+            40
+        );
+
+
+    temperature +=
+        random(
+            -1,
+            1
+        );
+
+
+    temperature=
+        Math.max(
+            70,
+            Math.min(
+                90,
+                temperature
+            )
+        );
+
+
+    fuel -= .01;
+
+
+    document.getElementById(
+        "speed"
+    ).innerText=
+        Math.round(speed);
+
+
+    document.getElementById(
+        "rpm"
+    ).innerText=
+        Math.round(rpm);
+
+
+    document.getElementById(
+        "fuel"
+    ).innerText=
+        Math.round(fuel)+"%";
+
+
+    document.getElementById(
+        "temp"
+    ).innerText=
+        temperature+"°C";
+
+
+    document.getElementById(
+        "visibility"
+    ).innerText=
+        visibility;
+
+
+    document.getElementById(
+        "visibilityBar"
+    ).style.width=
+        visibility+"%";
+
+
+    document.getElementById(
+        "following"
+    ).innerText=
+        distance;
+
+
+    document.getElementById(
+        "distanceBar"
+    ).style.width=
+        Math.min(
+            100,
+            distance*2
+        )+"%";
+
+
+    document.getElementById(
+        "pointCount"
+    ).innerText=
+        random(
+            260000,
+            310000
+        ).toLocaleString();
+
+
+    document.getElementById(
+        "fps"
+    ).innerText=
+        random(
+            17,
+            22
+        );
+
+
+    document.getElementById(
+        "heading"
+    ).innerText=
+        random(
+            309,
+            316
+        )+".4°";
+
+
+    calculateRisk();
+
+}
+
+
+/* =========================================================
+   RISK ENGINE
+========================================================= */
+
+function calculateRisk(){
+
+    let score=0;
+
+
+    if(
+        speed >
+        visibility*.30
+    ){
+
+        score+=30;
+
+    }
+
+
+    if(
+        distance<30
+    ){
+
+        score+=35;
+
+    }
+
+
+    if(
+        distance<20
+    ){
+
+        score+=25;
+
+    }
+
+
+    if(
+        visibility<50
+    ){
+
+        score+=20;
+
+    }
+
+
+    if(
+        visibility<25
+    ){
+
+        score+=20;
+
+    }
+
+
+    const riskBar=
+        document.getElementById(
+            "riskBar"
+        );
+
+
+    if(score>=65){
+
+        document.getElementById(
+            "riskValue"
+        ).innerText=
+            "HIGH";
+
+
+        document.getElementById(
+            "riskValue"
+        ).style.color=
+            "#ff4657";
+
+
+        riskBar.style.width=
+            "90%";
+
+
+        setAlert(
+            "CRITICAL",
+            "HIGH COLLISION RISK",
+            "Obstacle, speed or visibility conditions require immediate driver attention."
+        );
+
+    }
+
+    else if(score>=30){
+
+        document.getElementById(
+            "riskValue"
+        ).innerText=
+            "MEDIUM";
+
+
+        document.getElementById(
+            "riskValue"
+        ).style.color=
+            "#ffc83d";
+
+
+        riskBar.style.width=
+            "55%";
+
+
+        setAlert(
+            "WARNING",
+            "REDUCE SPEED",
+            "Current conditions require reduced speed and increased following distance."
+        );
+
+    }
+
+    else{
+
+        document.getElementById(
+            "riskValue"
+        ).innerText=
+            "LOW";
+
+
+        document.getElementById(
+            "riskValue"
+        ).style.color=
+            "#20d889";
+
+
+        riskBar.style.width=
+            "15%";
+
+
+        setAlert(
+            "SAFE",
+            "SAFE TO PROCEED",
+            "All perception systems indicate safe forward movement."
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   EVENT LOG CLEAR
+========================================================= */
+
+function clearLog(){
+
+    document.getElementById(
+        "eventLog"
+    ).innerHTML="";
+
+}
+
+
+/* =========================================================
+   WINDOW RESIZE
+========================================================= */
+
+window.addEventListener(
+    "resize",
+    function(){
+
+        if(
+            !camera3D ||
+            !renderer
+        )
+            return;
+
+
+        const container=
+            document.getElementById(
+                "lidarView"
+            );
+
+
+        camera3D.aspect=
+            container.clientWidth/
+            container.clientHeight;
+
+
+        camera3D.updateProjectionMatrix();
+
+
+        renderer.setSize(
+            container.clientWidth,
+            container.clientHeight
+        );
+
+    }
+);
+
+
+/* =========================================================
+   START
+========================================================= */
+
+window.addEventListener(
+    "load",
+    function(){
+
+        initLidar();
+
+        initMap();
+
+        updateTelemetry();
+
+        addLog(
+            "FogGuard driver interface ready"
+        );
+
+        addLog(
+            "V2V communication link ONLINE"
+        );
+
+        addLog(
+            "V2I control-room uplink ONLINE"
+        );
+
+        addLog(
+            "Safety decision engine ready"
+        );
+
+    }
+);
+
+
+/* =========================================================
+   TIMERS
+========================================================= */
+
+setInterval(
+    updateTelemetry,
+    2000
+);
+
+
+setInterval(
+    updateMapPosition,
+    3000
+);
+
+</script>
+
+</body>
+</html>

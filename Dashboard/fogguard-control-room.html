@@ -1,0 +1,1954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FogGuard — Mine Safety Control Room</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#070a0f;
+  --panel:#0e131a;
+  --panel2:#151b23;
+  --panel3:#1b232d;
+  --line:#27313d;
+  --line2:#1c242e;
+  --text:#e7edf3;
+  --dim:#84909d;
+  --faint:#4e5966;
+
+  --green:#2dd4a7;
+  --yellow:#f2a623;
+  --orange:#ff9040;
+  --red:#ef5350;
+  --blue:#4d9bea;
+  --purple:#9b7cff;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'IBM Plex Sans',sans-serif;
+  overflow:hidden;
+}
+
+button,input,select{font-family:inherit;color:inherit}
+.mono{font-family:'IBM Plex Mono',monospace}
+
+.green{color:var(--green)!important}
+.yellow{color:var(--yellow)!important}
+.orange{color:var(--orange)!important}
+.red{color:var(--red)!important}
+.blue{color:var(--blue)!important}
+.purple{color:var(--purple)!important}
+.dimc{color:var(--dim)!important}
+
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-thumb{background:#28323d;border-radius:10px}
+::-webkit-scrollbar-track{background:transparent}
+
+/* ================= APP SHELL ================= */
+
+.app{
+  height:100vh;
+  display:grid;
+  grid-template-rows:62px 1fr 42px;
+}
+
+/* ================= TOP BAR ================= */
+
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  padding:0 16px;
+  background:var(--panel);
+  border-bottom:1px solid var(--line);
+}
+
+.brand{display:flex;align-items:center;gap:11px;flex-shrink:0}
+
+.logo{
+  width:36px;height:36px;border-radius:9px;
+  background:linear-gradient(140deg,#c1613f,#f2a623);
+  color:#080b0f;display:flex;align-items:center;justify-content:center;
+  font:600 14px 'IBM Plex Mono';
+}
+
+.brand h1{font-size:14px;letter-spacing:.2px}
+.brand p{color:var(--dim);font-size:10px;margin-top:2px}
+
+.top-right{display:flex;align-items:center;gap:14px}
+
+.metric{text-align:right;line-height:1.1}
+.metric small{display:block;color:var(--dim);font-size:8.5px;letter-spacing:.5px}
+.metric b{font:600 14px 'IBM Plex Mono'}
+.metric span{font-size:9px;color:var(--faint)}
+
+.divider{width:1px;height:30px;background:var(--line)}
+
+.clock{padding-left:2px;font:600 14px 'IBM Plex Mono';text-align:right}
+.clock small{display:block;color:var(--dim);font:400 8.5px 'IBM Plex Sans';letter-spacing:.5px}
+
+/* ================= BUTTONS ================= */
+
+.btn{
+  border:1px solid var(--line);
+  background:var(--panel2);
+  border-radius:7px;
+  padding:7px 10px;
+  cursor:pointer;
+  font-size:10px;
+  letter-spacing:.3px;
+  transition:border-color .15s,color .15s,background .15s;
+}
+.btn:hover{border-color:var(--yellow);color:var(--yellow)}
+.btn:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+.btn.active{border-color:var(--green);color:var(--green);background:#10251f}
+.btn.danger{border-color:#703033;color:#ff8b8f;background:#1c1113}
+.btn.danger:hover{background:#321719;border-color:#a04046;color:#ffb3b6}
+
+/* ================= LAYOUT ================= */
+
+.layout{
+  min-height:0;
+  display:grid;
+  grid-template-columns:262px 1fr 358px;
+}
+
+.panel-head{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:11px 13px 9px;
+  color:var(--dim);
+  font-size:10px;font-weight:600;letter-spacing:.7px;
+  border-bottom:1px solid var(--line2);
+}
+.panel-head .count{
+  background:var(--panel2);border:1px solid var(--line);
+  padding:2px 7px;border-radius:20px;font:500 9.5px 'IBM Plex Mono';color:var(--text);
+}
+
+/* ================= LEFT / FLEET ================= */
+
+.left{
+  background:var(--panel);
+  border-right:1px solid var(--line);
+  display:flex;flex-direction:column;min-height:0;
+}
+
+.fleet-filter{display:flex;gap:5px;padding:9px 10px}
+.filter{
+  flex:1;border:1px solid var(--line);background:var(--panel2);
+  color:var(--dim);border-radius:6px;padding:6px 2px;cursor:pointer;font-size:9px;
+}
+.filter.active{color:var(--yellow);border-color:var(--yellow);background:#1d1810}
+
+.veh-list{flex:1;min-height:0;overflow:auto;padding:0 9px 10px;display:flex;flex-direction:column;gap:5px}
+
+.vehicle{
+  padding:8px 9px;border:1px solid var(--line);border-radius:8px;
+  background:var(--panel2);cursor:pointer;transition:border-color .15s,background .15s;
+}
+.vehicle:hover{border-color:#45515e}
+.vehicle.selected{border-color:var(--yellow);background:#1f1a10}
+
+.veh-top{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.veh-id{font:600 12px 'IBM Plex Mono'}
+
+.badge{padding:2px 6px;border-radius:20px;font-size:8px;font-weight:600;letter-spacing:.3px;white-space:nowrap}
+.badge.normal{background:#123a31;color:var(--green)}
+.badge.advisory{background:#3b2f13;color:var(--yellow)}
+.badge.capped{background:#4a3212;color:#ffba55}
+.badge.convoy{background:#4a1f22;color:#ff8589}
+.badge.halt{background:#5a1c20;color:#ff9ea1}
+.badge.cmd{background:#2a2050;color:#b7a4ff}
+
+.veh-sub{margin-top:4px;color:var(--dim);font-size:9px;display:flex;justify-content:space-between;gap:6px}
+.veh-sub b{color:#c3ccd6;font:500 9.5px 'IBM Plex Mono'}
+.veh-link{margin-top:4px;display:flex;justify-content:space-between;font:9px 'IBM Plex Mono';color:var(--faint)}
+
+.zone-block{padding:9px 13px 4px}
+.zone{margin-bottom:8px}
+.zone-head{display:flex;justify-content:space-between;font-size:9px;margin-bottom:4px}
+.zone-head span{color:var(--dim)}
+.zone-head b{font:600 9.5px 'IBM Plex Mono'}
+.bar{height:6px;border-radius:10px;background:var(--panel2);overflow:hidden}
+.bar-fill{height:100%;transition:width .5s,background .5s}
+
+.legend{padding:8px 13px 12px;border-top:1px solid var(--line2)}
+.legend-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 8px;font-size:8.5px;color:var(--dim)}
+.legend-row{display:flex;align-items:center;gap:5px}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.sq{width:8px;height:3px;border-radius:2px;flex-shrink:0}
+
+/* ================= MAP ================= */
+
+.map{position:relative;overflow:hidden;background:radial-gradient(circle at 46% 46%,#101823 0%,#070b11 70%)}
+#mapSvg{width:100%;height:100%;display:block;cursor:grab}
+#mapSvg.dragging{cursor:grabbing}
+
+.map-overlay{position:absolute;z-index:10}
+
+.live-status{
+  left:14px;top:13px;
+  background:#0d1715ee;border:1px solid #1f4e42;border-radius:7px;
+  padding:6px 10px;font-size:9px;color:var(--green);letter-spacing:.3px;
+}
+.live-dot{
+  display:inline-block;width:6px;height:6px;border-radius:50%;
+  background:var(--green);box-shadow:0 0 9px var(--green);margin-right:5px;
+  animation:blink 2s infinite;
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+
+.map-tools{right:14px;top:13px;display:flex;gap:5px}
+.map-tool{
+  height:32px;min-width:32px;padding:0 8px;
+  border:1px solid var(--line);background:#10161eee;border-radius:7px;
+  cursor:pointer;font-size:13px;
+}
+.map-tool:hover{color:var(--yellow);border-color:var(--yellow)}
+.map-tool.small{font-size:9px}
+
+.vehicle-info{
+  left:14px;top:50px;width:236px;
+  background:#0d131bf7;border:1px solid var(--line);border-radius:9px;padding:11px;
+  display:none;box-shadow:0 16px 38px #0009;
+}
+.vehicle-info.show{display:block}
+.info-title{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px}
+.info-title b{font:600 14px 'IBM Plex Mono'}
+.info-title small{display:block;color:var(--dim);font-size:9px;margin-top:2px}
+.close{border:0;background:none;color:var(--dim);cursor:pointer;font-size:16px;line-height:1}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.info-box{background:var(--panel2);border-radius:6px;padding:6px 7px}
+.info-box small{display:block;color:var(--dim);font-size:8px;letter-spacing:.3px}
+.info-box b{display:block;margin-top:2px;font:600 10.5px 'IBM Plex Mono'}
+.info-actions{display:flex;gap:5px;margin-top:8px}
+.info-actions .btn{flex:1;padding:6px 4px;font-size:9px;text-align:center}
+
+.simulator{
+  right:14px;bottom:14px;width:236px;
+  background:#0e141cf2;border:1px solid var(--line);border-radius:9px;padding:10px;
+}
+.sim-title{display:flex;justify-content:space-between;color:var(--dim);font-size:9px;margin-bottom:7px}
+.sim-title b{color:var(--yellow)}
+.slider{width:100%;accent-color:var(--yellow)}
+.sim-value{margin-top:4px;display:flex;justify-content:space-between;font:10px 'IBM Plex Mono';color:var(--dim)}
+.sim-value b{color:var(--text)}
+.sim-foot{display:flex;gap:5px;margin-top:8px}
+.sim-foot .btn{flex:1;padding:5px 4px;font-size:9px}
+
+.map-kpis{left:50%;bottom:14px;transform:translateX(-50%);display:flex;gap:5px}
+.mini-kpi{
+  min-width:76px;background:#0e141cf2;border:1px solid var(--line);
+  border-radius:7px;padding:6px 9px;text-align:center;
+}
+.mini-kpi small{display:block;color:var(--dim);font-size:7.5px;letter-spacing:.4px}
+.mini-kpi b{display:block;margin-top:2px;font:600 13px 'IBM Plex Mono'}
+
+.map-scale{
+  left:14px;bottom:14px;
+  background:#0e141ce6;border:1px solid var(--line);border-radius:7px;
+  padding:7px 10px;display:flex;align-items:center;gap:11px;
+}
+.north{text-align:center;color:var(--dim);font:600 9px 'IBM Plex Mono'}
+.north svg{display:block;margin:0 auto 1px}
+.scalebar{font:9px 'IBM Plex Mono';color:var(--dim)}
+.scalebar i{
+  display:block;width:88px;height:5px;margin-bottom:3px;
+  border:1px solid #66717d;border-left:0;border-right:0;
+  background:linear-gradient(90deg,#66717d 50%,transparent 50%);
+}
+
+/* ================= RIGHT / V2I ================= */
+
+.right{
+  background:var(--panel);border-left:1px solid var(--line);
+  display:flex;flex-direction:column;min-height:0;
+}
+
+.rsu-strip{display:flex;gap:5px;padding:8px 10px;overflow-x:auto;border-bottom:1px solid var(--line2)}
+.rsu-chip{
+  flex-shrink:0;border:1px solid var(--line);background:var(--panel2);
+  border-radius:6px;padding:5px 7px;font:9px 'IBM Plex Mono';color:var(--dim);
+  cursor:pointer;
+}
+.rsu-chip b{display:block;color:var(--text);font-size:9.5px;margin-bottom:2px}
+.rsu-chip.up{border-color:#1f4e42}
+.rsu-chip.up b{color:var(--green)}
+.rsu-chip.down{border-color:#5c2b2e}
+.rsu-chip.down b{color:var(--red)}
+
+.link-stats{display:flex;border-bottom:1px solid var(--line2)}
+.link-stats div{flex:1;padding:7px 4px;text-align:center;border-right:1px solid var(--line2)}
+.link-stats div:last-child{border-right:0}
+.link-stats small{display:block;color:var(--faint);font-size:7.5px;letter-spacing:.3px}
+.link-stats b{font:600 11px 'IBM Plex Mono'}
+
+.tabs{display:flex;padding:0 10px;gap:14px;border-bottom:1px solid var(--line2)}
+.tab{
+  background:none;border:0;border-bottom:2px solid transparent;
+  padding:9px 2px;cursor:pointer;color:var(--dim);font-size:10px;font-weight:600;letter-spacing:.5px;
+}
+.tab.active{color:var(--yellow);border-bottom-color:var(--yellow)}
+.tab .n{
+  margin-left:5px;background:var(--panel2);border:1px solid var(--line);
+  border-radius:20px;padding:1px 5px;font:500 8.5px 'IBM Plex Mono';color:var(--text);
+}
+
+.feed-tools{display:flex;gap:5px;padding:7px 10px;border-bottom:1px solid var(--line2)}
+.chip{
+  border:1px solid var(--line);background:var(--panel2);color:var(--dim);
+  border-radius:20px;padding:3px 8px;font-size:8.5px;cursor:pointer;
+}
+.chip.on{color:var(--blue);border-color:#2f5f8e;background:#101c28}
+
+.feed{flex:1;min-height:0;overflow:auto;padding:6px 0}
+
+.msg{padding:6px 11px 7px;border-left:2px solid var(--line);margin-bottom:2px}
+.msg:hover{background:#121821}
+.msg.p1{border-left-color:var(--red)}
+.msg.p2{border-left-color:var(--yellow)}
+.msg.p3{border-left-color:var(--blue)}
+.msg.p4{border-left-color:#2b3541}
+.msg.p4 .msg-body{color:var(--dim)}
+.msg.p4 .msg-route{color:var(--faint)}
+
+.msg-top{display:flex;align-items:center;gap:6px;font:9px 'IBM Plex Mono'}
+.dirtag{
+  border-radius:3px;padding:1px 4px;font-size:8px;font-weight:600;letter-spacing:.3px;
+  background:#1a2530;color:var(--blue);
+}
+.dirtag.ul{background:#10251f;color:var(--green)}
+.dirtag.bc{background:#2a2050;color:#b7a4ff}
+.msg-route{color:#aeb8c2;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.msg-time{color:var(--faint);font-size:8.5px}
+.msg-body{margin-top:3px;font-size:10px;line-height:1.45;color:#dbe3ea}
+.msg-meta{margin-top:3px;font:8.5px 'IBM Plex Mono';color:var(--faint);display:flex;gap:8px;align-items:center}
+.msg-type{font-weight:600;font-size:8.5px;letter-spacing:.3px}
+.st{padding:0 4px;border-radius:3px;background:#161d26}
+.st.ACK{color:var(--green)}
+.st.DLVD{color:var(--blue)}
+.st.TX{color:var(--dim)}
+.st.LOST{color:var(--red)}
+
+.alert{margin:0 11px 6px;padding:7px 8px 7px 9px;border-left:2px solid var(--line);cursor:pointer}
+.alert:hover{background:var(--panel2)}
+.alert.high{border-color:var(--red)}
+.alert.mid{border-color:var(--yellow)}
+.alert.low{border-color:var(--green)}
+.alert.ackd{opacity:.42}
+.alert-time{color:var(--faint);font:8px 'IBM Plex Mono'}
+.alert-text{margin-top:3px;font-size:9.5px;line-height:1.45}
+.ack{float:right;color:var(--dim);font:8px 'IBM Plex Mono';border:1px solid var(--line);border-radius:3px;padding:0 4px}
+
+.composer{border-top:1px solid var(--line);background:#0c1117;padding:9px 10px 10px}
+.comp-row{display:flex;gap:5px;margin-bottom:6px}
+.composer select,.composer input{
+  flex:1;min-width:0;background:var(--panel2);border:1px solid var(--line);
+  border-radius:6px;padding:6px 7px;font-size:10px;
+}
+.composer select:focus,.composer input:focus{outline:1px solid var(--blue);border-color:var(--blue)}
+.composer option{background:#151b23}
+.send{
+  border:1px solid #2f5f8e;background:#122132;color:#8ec5ff;border-radius:6px;
+  padding:6px 13px;font-size:10px;font-weight:600;cursor:pointer;
+}
+.send:hover{background:#17293d}
+.prio-set{display:flex;gap:4px}
+.prio{
+  border:1px solid var(--line);background:var(--panel2);color:var(--dim);
+  border-radius:6px;padding:5px 8px;font:9px 'IBM Plex Mono';cursor:pointer;
+}
+.prio.on{border-color:var(--yellow);color:var(--yellow)}
+.quick{display:flex;gap:4px;flex-wrap:wrap}
+.quick button{
+  border:1px solid var(--line);background:var(--panel2);color:var(--dim);
+  border-radius:5px;padding:4px 7px;font-size:8.5px;cursor:pointer;
+}
+.quick button:hover{color:var(--text);border-color:#45515e}
+.quick button.danger{border-color:#703033;color:#ff8b8f}
+
+/* ================= BOTTOM ================= */
+
+.bottom{
+  display:flex;align-items:center;background:var(--panel);
+  border-top:1px solid var(--line);padding:0 14px;overflow-x:auto;
+}
+.stat{
+  padding:0 14px;border-right:1px solid var(--line2);
+  display:flex;gap:6px;align-items:baseline;white-space:nowrap;
+}
+.stat:first-child{padding-left:0}
+.stat:last-child{border-right:0}
+.stat small{color:var(--dim);font-size:8.5px;letter-spacing:.3px}
+.stat b{font:600 11px 'IBM Plex Mono'}
+
+/* ================= RESPONSIVE ================= */
+
+@media(max-width:1500px){
+  .metric.optional{display:none}
+}
+@media(max-width:1250px){
+  .layout{grid-template-columns:230px 1fr 320px}
+  .brand p{display:none}
+}
+@media(max-width:1020px){
+  .layout{grid-template-columns:1fr 330px}
+  .left{display:none}
+}
+@media(max-width:780px){
+  .layout{grid-template-columns:1fr}
+  .right{display:none}
+  .top-right .metric{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+<!-- ========================= TOP BAR ========================= -->
+<header class="topbar">
+
+  <div class="brand">
+    <div class="logo">FG</div>
+    <div>
+      <h1>FogGuard Control Room</h1>
+      <p>Kalyani Open Cast Iron Ore Mine · Lease MH/IO/2231 · DGMS Reg. 106 compliant</p>
+    </div>
+  </div>
+
+  <div class="top-right">
+
+    <div class="metric optional">
+      <small>Shift</small>
+      <b id="shiftEl">A</b>
+    </div>
+
+    <div class="metric optional">
+      <small>Wind</small>
+      <b id="windEl" class="dimc">-- km/h</b>
+    </div>
+
+    <div class="metric optional">
+      <small>Temp / RH</small>
+      <b id="tempEl" class="dimc">--</b>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="metric">
+      <small>Visibility</small>
+      <b id="visibility" class="green">-- m</b>
+    </div>
+
+    <div class="metric">
+      <small>Peak severity</small>
+      <b id="peak" class="yellow">-- / 5</b>
+    </div>
+
+    <div class="metric">
+      <small>Fleet linked</small>
+      <b id="activeFleet">--</b>
+    </div>
+
+    <div class="divider"></div>
+
+    <button class="btn active" id="liveBtn">● Live</button>
+    <button class="btn" id="speedBtn">1×</button>
+    <button class="btn" id="soundBtn">Sound off</button>
+    <button class="btn danger" id="haltBtn">Stop all haulage</button>
+
+    <div class="divider"></div>
+
+    <div class="clock">
+      <small>IST</small>
+      <span id="clock">--:--:--</span>
+    </div>
+
+  </div>
+</header>
+
+
+<main class="layout">
+
+<!-- ========================= LEFT ========================= -->
+<section class="left">
+
+  <div class="panel-head">
+    <span>FLEET MONITOR</span>
+    <span class="count" id="fleetCount">0</span>
+  </div>
+
+  <div class="fleet-filter">
+    <button class="filter active" data-filter="all">All</button>
+    <button class="filter" data-filter="haul">Haul</button>
+    <button class="filter" data-filter="light">Light</button>
+    <button class="filter" data-filter="risk">At risk</button>
+  </div>
+
+  <div class="veh-list" id="vehicleList"></div>
+
+  <div class="panel-head"><span>FOG SEVERITY BY ZONE</span></div>
+  <div class="zone-block" id="zones"></div>
+
+  <div class="legend">
+    <div class="legend-grid">
+      <div class="legend-row"><span class="dot" style="background:#2dd4a7"></span>Normal</div>
+      <div class="legend-row"><span class="dot" style="background:#f2a623"></span>Advisory</div>
+      <div class="legend-row"><span class="dot" style="background:#ff9040"></span>Speed cap</div>
+      <div class="legend-row"><span class="dot" style="background:#ef5350"></span>Convoy / halt</div>
+      <div class="legend-row"><span class="dot" style="background:#4d9bea"></span>Person on foot</div>
+      <div class="legend-row"><span class="sq" style="background:#4d9bea"></span>V2I radio link</div>
+      <div class="legend-row"><span class="sq" style="background:#39434f"></span>Haul road</div>
+      <div class="legend-row"><span class="sq" style="background:#6b5a3e"></span>Bench crest</div>
+    </div>
+  </div>
+
+</section>
+
+
+<!-- ========================= MAP ========================= -->
+<section class="map">
+
+  <div class="map-overlay live-status">
+    <span class="live-dot"></span><span id="fusionText">Sensor fusion online · camera + LiDAR + radar + RTK GPS</span>
+  </div>
+
+  <div class="map-overlay map-tools">
+    <button class="map-tool" id="zoomIn" title="Zoom in">+</button>
+    <button class="map-tool" id="zoomOut" title="Zoom out">−</button>
+    <button class="map-tool" id="resetMap" title="Reset view">⌂</button>
+    <button class="map-tool small" id="labelBtn" title="Toggle map labels">Labels</button>
+    <button class="map-tool small" id="fogBtn" title="Toggle fog overlay">Fog</button>
+  </div>
+
+  <div class="map-overlay vehicle-info" id="vehicleInfo">
+    <div class="info-title">
+      <div>
+        <b id="infoId">D-07</b>
+        <small id="infoSub">BH60 dumper · S. Pawar</small>
+      </div>
+      <button class="close" id="closeInfo" title="Close">×</button>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-box"><small>SPEED</small><b id="infoSpeed">28 km/h</b></div>
+      <div class="info-box"><small>FOG SEVERITY</small><b id="infoSeverity">1 / 5</b></div>
+      <div class="info-box"><small>PAYLOAD</small><b id="infoPayload">60 t</b></div>
+      <div class="info-box"><small>TRIPS THIS SHIFT</small><b id="infoTrips">4</b></div>
+      <div class="info-box"><small>ROUTE</small><b id="infoRoute">Ore haul</b></div>
+      <div class="info-box"><small>V2I LINK</small><b id="infoLink">RSU-01 −58</b></div>
+    </div>
+
+    <div class="info-actions">
+      <button class="btn" data-cmd="CAP">Cap speed</button>
+      <button class="btn" data-cmd="CONVOY">Convoy</button>
+      <button class="btn danger" data-cmd="HALT">Hold</button>
+    </div>
+  </div>
+
+  <div class="map-overlay simulator">
+    <div class="sim-title">
+      <span>FOG CONDITION SIMULATOR</span>
+      <b id="simMode">AUTO DRIFT</b>
+    </div>
+    <input class="slider" id="fogSlider" type="range" min="0" max="5" value="2" step="1" aria-label="Fog severity">
+    <div class="sim-value">
+      <span>All zones</span>
+      <b id="fogValue">2 / 5 · advisory</b>
+    </div>
+    <div class="sim-foot">
+      <button class="btn active" id="autoFogBtn">Auto drift</button>
+      <button class="btn" id="clearFogBtn">Clear fog</button>
+    </div>
+  </div>
+
+  <div class="map-overlay map-kpis">
+    <div class="mini-kpi"><small>RUNNING</small><b class="green" id="kpiSafe">0</b></div>
+    <div class="mini-kpi"><small>RESTRICTED</small><b class="yellow" id="kpiRisk">0</b></div>
+    <div class="mini-kpi"><small>CONVOY / HOLD</small><b class="red" id="kpiConvoy">0</b></div>
+    <div class="mini-kpi"><small>V2I LINKED</small><b class="blue" id="kpiLinked">0</b></div>
+  </div>
+
+  <div class="map-overlay map-scale">
+    <div class="north">
+      <svg width="14" height="18" viewBox="0 0 14 18" aria-hidden="true">
+        <polygon points="7,0 12,17 7,13 2,17" fill="#8793a0"></polygon>
+      </svg>
+      N
+    </div>
+    <div class="scalebar"><i></i><span id="scaleLabel">200 m</span></div>
+  </div>
+
+  <svg id="mapSvg" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid meet"></svg>
+</section>
+
+
+<!-- ========================= RIGHT / V2I ========================= -->
+<section class="right">
+
+  <div class="panel-head">
+    <span>V2I COMMUNICATION</span>
+    <span class="count">ITS-G5 · 5.9 GHz</span>
+  </div>
+
+  <div class="rsu-strip" id="rsuStrip"></div>
+
+  <div class="link-stats">
+    <div><small>SENT</small><b id="statTx">0</b></div>
+    <div><small>RECEIVED</small><b id="statRx">0</b></div>
+    <div><small>LATENCY</small><b id="statLat" class="green">-- ms</b></div>
+    <div><small>PACKET LOSS</small><b id="statLoss" class="green">0.0%</b></div>
+    <div><small>LINKS</small><b id="statLinks" class="blue">0/0</b></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" id="tabMsg" data-tab="msg">Messages<span class="n" id="msgCount">0</span></button>
+    <button class="tab" id="tabAlert" data-tab="alert">Alerts<span class="n" id="alertCount">0</span></button>
+  </div>
+
+  <div class="feed-tools" id="feedTools">
+    <button class="chip on" data-f="hb">Position beacons</button>
+    <button class="chip" data-f="p1">Priority 1 only</button>
+    <button class="chip" data-f="cmd">Commands</button>
+  </div>
+
+  <div class="feed" id="feed"></div>
+  <div class="feed" id="alertsFeed" style="display:none"></div>
+
+  <div class="composer" id="composer">
+    <div class="comp-row">
+      <select id="msgTarget" aria-label="Message recipient"></select>
+      <select id="msgType" aria-label="Message type">
+        <option value="SPD_ADV">Speed advisory</option>
+        <option value="CONVOY">Form convoy</option>
+        <option value="HALT">Hold position</option>
+        <option value="REROUTE">Reroute</option>
+        <option value="PED_WARN">Person on road</option>
+        <option value="RESUME">Resume normal ops</option>
+        <option value="TXT">Free text</option>
+      </select>
+    </div>
+    <div class="comp-row">
+      <input id="msgText" placeholder="Message to fleet" autocomplete="off">
+      <button class="send" id="sendBtn">Send</button>
+    </div>
+    <div class="comp-row" style="margin-bottom:0;align-items:center">
+      <div class="prio-set">
+        <button class="prio on" data-p="1">P1</button>
+        <button class="prio" data-p="2">P2</button>
+        <button class="prio" data-p="3">P3</button>
+      </div>
+      <div class="quick" style="flex:1;justify-content:flex-end">
+        <button data-quick="fog">Fog advisory</button>
+        <button data-quick="convoy">Convoy all</button>
+        <button data-quick="resume">Resume all</button>
+      </div>
+    </div>
+  </div>
+
+</section>
+</main>
+
+
+<!-- ========================= BOTTOM ========================= -->
+<footer class="bottom">
+  <div class="stat"><small>ORE HAULED (SHIFT)</small><b id="bTonnes">0 t</b></div>
+  <div class="stat"><small>TRIPS</small><b id="bTrips">0</b></div>
+  <div class="stat"><small>TARGET</small><b id="bTarget" class="green">0%</b></div>
+  <div class="stat"><small>AVG SPEED REDUCTION</small><b id="bSpeedRed" class="yellow">0%</b></div>
+  <div class="stat"><small>CONVOY / HOLD</small><b id="bConvoy">0</b></div>
+  <div class="stat"><small>REROUTES</small><b id="bReroutes">0</b></div>
+  <div class="stat"><small>V2I MESSAGES</small><b id="bMsgs" class="blue">0</b></div>
+  <div class="stat"><small>LINK HEALTH</small><b id="bLink" class="green">100%</b></div>
+  <div class="stat"><small>INCIDENTS</small><b id="bIncidents" class="green">0</b></div>
+  <div class="stat"><small>SYSTEM</small><b class="green">OPERATIONAL</b></div>
+</footer>
+
+</div>
+
+<script>
+"use strict";
+
+/* =========================================================
+   FOGGUARD AI — CONTROL ROOM ENGINE
+   Sections: 1 geometry helpers · 2 mine plan · 3 fleet
+             4 fog model · 5 V2I stack · 6 UI · 7 loop
+========================================================= */
+
+var NS = "http://www.w3.org/2000/svg";
+var svg = document.getElementById("mapSvg");
+var MAP_W = 1200, MAP_H = 800;
+
+/* Metres per SVG unit. Change this if you drop in a real survey plan. */
+var M_PER_UNIT = 2.5;
+
+/* Paste a georeferenced pit plan / drone ortho here (URL or data URI)
+   to use the real survey as a basemap under the vector layers. */
+var BASEMAP_URL = "";
+
+function el(tag, attrs, parent){
+  var e = document.createElementNS(NS, tag);
+  for (var k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function $(id){ return document.getElementById(id); }
+function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+function dist(ax,ay,bx,by){ return Math.hypot(ax-bx, ay-by); }
+
+/* ---------- 1. geometry helpers ---------- */
+
+function rng(seed){
+  return function(){
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    var t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+function blobPts(cx, cy, rx, ry, seed, n, jitter){
+  var r = rng(seed), pts = [];
+  for (var i = 0; i < n; i++){
+    var a = i / n * Math.PI * 2;
+    var j = 1 + (r() * 2 - 1) * jitter;
+    pts.push([cx + Math.cos(a) * rx * j, cy + Math.sin(a) * ry * j]);
+  }
+  return pts;
+}
+
+function smoothClosed(p){
+  var n = p.length, d = "M " + p[0][0].toFixed(1) + " " + p[0][1].toFixed(1);
+  for (var i = 0; i < n; i++){
+    var p0 = p[(i-1+n)%n], p1 = p[i], p2 = p[(i+1)%n], p3 = p[(i+2)%n];
+    d += " C " + (p1[0]+(p2[0]-p0[0])/6).toFixed(1) + " " + (p1[1]+(p2[1]-p0[1])/6).toFixed(1)
+       + ", " + (p2[0]-(p3[0]-p1[0])/6).toFixed(1) + " " + (p2[1]-(p3[1]-p1[1])/6).toFixed(1)
+       + ", " + p2[0].toFixed(1) + " " + p2[1].toFixed(1);
+  }
+  return d + " Z";
+}
+
+function smoothOpen(p){
+  var n = p.length, d = "M " + p[0][0].toFixed(1) + " " + p[0][1].toFixed(1);
+  for (var i = 0; i < n - 1; i++){
+    var p0 = p[Math.max(0,i-1)], p1 = p[i], p2 = p[i+1], p3 = p[Math.min(n-1,i+2)];
+    d += " C " + (p1[0]+(p2[0]-p0[0])/6).toFixed(1) + " " + (p1[1]+(p2[1]-p0[1])/6).toFixed(1)
+       + ", " + (p2[0]-(p3[0]-p1[0])/6).toFixed(1) + " " + (p2[1]-(p3[1]-p1[1])/6).toFixed(1)
+       + ", " + p2[0].toFixed(1) + " " + p2[1].toFixed(1);
+  }
+  return d;
+}
+
+/* ---------- defs + layers ---------- */
+
+var defs = el("defs", {}, svg);
+var fogFilter = el("filter", {id:"fogBlur", x:"-60%", y:"-60%", width:"220%", height:"220%"}, defs);
+el("feGaussianBlur", {stdDeviation:"26"}, fogFilter);
+
+var terrainGrad = el("radialGradient", {id:"terrain", cx:"42%", cy:"44%", r:"70%"}, defs);
+el("stop", {offset:"0%", "stop-color":"#131b25"}, terrainGrad);
+el("stop", {offset:"100%", "stop-color":"#0a0f16"}, terrainGrad);
+
+var LAYERS = {};
+["base","terrain","pit","dump","water","roads","facilities","fog","rsu","links","vehicles","labels","chrome"]
+  .forEach(function(n){ LAYERS[n] = el("g", {id:"layer-" + n}, svg); });
+
+el("rect", {x:0, y:0, width:MAP_W, height:MAP_H, fill:"url(#terrain)"}, LAYERS.base);
+
+if (BASEMAP_URL){
+  el("image", {href:BASEMAP_URL, x:0, y:0, width:MAP_W, height:MAP_H, opacity:.55,
+               preserveAspectRatio:"xMidYMid slice"}, LAYERS.base);
+}
+
+/* survey grid */
+for (var gx = 0; gx <= MAP_W; gx += 100)
+  el("line", {x1:gx, y1:0, x2:gx, y2:MAP_H, stroke:"#4a5664", "stroke-width":.6, opacity:.10}, LAYERS.base);
+for (var gy = 0; gy <= MAP_H; gy += 100)
+  el("line", {x1:0, y1:gy, x2:MAP_W, y2:gy, stroke:"#4a5664", "stroke-width":.6, opacity:.10}, LAYERS.base);
+
+/* ---------- 2. mine plan ---------- */
+
+var PIT = {cx:330, cy:470, rx:262, ry:196};
+
+var BENCHES = [
+  {f:1.00, rl:285, fill:"#161d26"},
+  {f:0.84, rl:270, fill:"#1a212b"},
+  {f:0.68, rl:255, fill:"#1f2630"},
+  {f:0.52, rl:240, fill:"#252a31"},
+  {f:0.36, rl:225, fill:"#2b2a29"},
+  {f:0.21, rl:210, fill:"#332b22"}
+];
+
+/* terrain relief */
+[[120,140,180,110,7,"#131a23"],[980,660,220,130,9,"#121922"],[640,90,260,110,11,"#121922"]]
+  .forEach(function(t){
+    el("path", {d:smoothClosed(blobPts(t[0],t[1],t[2],t[3],t[4],14,.12)), fill:t[5], opacity:.75}, LAYERS.terrain);
+  });
+
+/* lease boundary */
+el("path", {
+  d: smoothClosed(blobPts(600, 400, 570, 372, 42, 18, .06)),
+  fill:"none", stroke:"#3d4855", "stroke-width":1.2, "stroke-dasharray":"12 7 3 7", opacity:.65
+}, LAYERS.terrain);
+el("text", {x:70, y:36, fill:"#4e5966", "font-size":"9.5", "font-family":"IBM Plex Mono",
+  "letter-spacing":"1", "class":"maplabel"}, LAYERS.labels).textContent = "LEASE BOUNDARY — 412 Ha";
+
+/* bench ticks */
+function crestTicks(pathEl, layer, size, step, colour){
+  var L = pathEl.getTotalLength();
+  for (var s = 0; s < L; s += step){
+    var p = pathEl.getPointAtLength(s);
+    var dx = PIT.cx - p.x, dy = PIT.cy - p.y, m = Math.hypot(dx, dy) || 1;
+    el("line", {x1:p.x, y1:p.y, x2:p.x + dx/m*size, y2:p.y + dy/m*size,
+      stroke:colour, "stroke-width":.9, opacity:.45}, layer);
+  }
+}
+
+BENCHES.forEach(function(b, i){
+  var d = smoothClosed(blobPts(PIT.cx, PIT.cy, PIT.rx*b.f, PIT.ry*b.f, 900 + i*53, 22, .045));
+  var p = el("path", {d:d, fill:b.fill, stroke:"#6b5a3e", "stroke-width":1, opacity:1}, LAYERS.pit);
+  crestTicks(p, LAYERS.pit, 7, 26, "#6b5a3e");
+  el("text", {
+    x: PIT.cx - PIT.rx*b.f + 14, y: PIT.cy + 3,
+    fill:"#6d7783", "font-size":"8", "font-family":"IBM Plex Mono", "class":"maplabel"
+  }, LAYERS.labels).textContent = "RL " + b.rl;
+});
+
+/* mine sump */
+el("path", {d:smoothClosed(blobPts(292, 502, 46, 26, 71, 12, .12)), fill:"#16394d", opacity:.85,
+  stroke:"#2b6e8f", "stroke-width":.8}, LAYERS.water);
+el("text", {x:292, y:534, fill:"#4d8bad", "font-size":"8", "font-family":"IBM Plex Mono",
+  "text-anchor":"middle", "class":"maplabel"}, LAYERS.labels).textContent = "SUMP";
+
+/* waste dump — three lifts */
+var DUMP = {cx:1000, cy:545, rx:172, ry:122};
+[[1.00,"#1a1f27",640],[0.70,"#20252d",641],[0.42,"#272b32",642]].forEach(function(l){
+  var d = smoothClosed(blobPts(DUMP.cx, DUMP.cy, DUMP.rx*l[0], DUMP.ry*l[0], l[2], 18, .07));
+  var p = el("path", {d:d, fill:l[1], stroke:"#5d6673", "stroke-width":.9}, LAYERS.dump);
+  var L = p.getTotalLength();
+  for (var s = 0; s < L; s += 24){
+    var pt = p.getPointAtLength(s);
+    var dx = DUMP.cx - pt.x, dy = DUMP.cy - pt.y, m = Math.hypot(dx,dy) || 1;
+    el("line", {x1:pt.x, y1:pt.y, x2:pt.x + dx/m*6, y2:pt.y + dy/m*6,
+      stroke:"#5d6673", "stroke-width":.8, opacity:.4}, LAYERS.dump);
+  }
+});
+
+/* ramp — spiral from pit floor to rim */
+function rampPoints(){
+  var pts = [], turns = 2.3, aEnd = -0.38, N = 110;
+  for (var i = 0; i <= N; i++){
+    var t = i / N;
+    var a = aEnd - (1 - t) * turns * Math.PI * 2;
+    var f = 0.17 + t * 0.83;
+    pts.push([
+      PIT.cx + Math.cos(a) * PIT.rx * f * 0.94,
+      PIT.cy + Math.sin(a) * PIT.ry * f * 0.94
+    ]);
+  }
+  return pts;
+}
+var RAMP = rampPoints();
+var RAMP_END = RAMP[RAMP.length - 1];
+
+/* road network */
+var HR_ORE   = [RAMP_END, [630,384], [700,352], [770,312], [840,272], [905,232], [960,196], [1006,172]];
+var HR_WASTE = [RAMP_END, [630,384], [700,352], [782,300], [846,338], [898,392], [940,452], [968,508], [984,540]];
+var SVC_RD   = [RAMP_END, [635,472], [668,540], [670,606], [632,664], [556,708], [456,730], [360,742], [268,746]];
+var RIM_RD   = blobPts(PIT.cx, PIT.cy, PIT.rx*1.13, PIT.ry*1.15, 77, 20, .035);
+var WALKWAY  = [[838,304], [858,280], [874,254], [892,230], [906,206]];
+
+function drawRoad(d, w){
+  el("path", {d:d, fill:"none", stroke:"#141a22", "stroke-width":w+9,
+    "stroke-linecap":"round", "stroke-linejoin":"round"}, LAYERS.roads);
+  el("path", {d:d, fill:"none", stroke:"#39434f", "stroke-width":w,
+    "stroke-linecap":"round", "stroke-linejoin":"round"}, LAYERS.roads);
+  el("path", {d:d, fill:"none", stroke:"#606b78", "stroke-width":1,
+    "stroke-dasharray":"8 10", opacity:.5}, LAYERS.roads);
+  return el("path", {d:d, fill:"none", stroke:"none"}, LAYERS.roads);
+}
+
+var ROUTES = {
+  ORE:   {guide: drawRoad(smoothOpen(RAMP.concat(HR_ORE.slice(1))), 15), label:"Ore haul"},
+  WASTE: {guide: drawRoad(smoothOpen(RAMP.concat(HR_WASTE.slice(1))), 15), label:"Overburden"},
+  SVC:   {guide: drawRoad(smoothOpen(SVC_RD), 9), label:"Service road"},
+  RIM:   {guide: drawRoad(smoothClosed(RIM_RD), 8), label:"Rim patrol", closed:true}
+};
+Object.keys(ROUTES).forEach(function(k){ ROUTES[k].len = ROUTES[k].guide.getTotalLength(); });
+
+/* walkway */
+var walkPath = el("path", {d:smoothOpen(WALKWAY), fill:"none", stroke:"#4d9bea",
+  "stroke-width":2.5, "stroke-dasharray":"5 6", opacity:.55}, LAYERS.roads);
+var WALK_LEN = walkPath.getTotalLength();
+
+/* facilities */
+function facility(x, y, w, h, name, sub, accent){
+  var g = el("g", {}, LAYERS.facilities);
+  el("rect", {x:x, y:y, width:w, height:h, rx:4, fill:"#161d27",
+    stroke: accent || "#48545f", "stroke-width":1}, g);
+  el("rect", {x:x, y:y, width:4, height:h, rx:2, fill: accent || "#48545f", opacity:.85}, g);
+  var t = el("text", {x:x + w/2, y:y - 6, fill:"#98a3af", "font-size":"9.5",
+    "font-family":"IBM Plex Mono", "text-anchor":"middle", "class":"maplabel"}, LAYERS.labels);
+  t.textContent = name;
+  if (sub){
+    var s = el("text", {x:x + w/2, y:y + h + 12, fill:"#5b6673", "font-size":"8",
+      "font-family":"IBM Plex Mono", "text-anchor":"middle", "class":"maplabel"}, LAYERS.labels);
+    s.textContent = sub;
+  }
+  return g;
+}
+
+facility(958, 128, 132, 56, "PRIMARY CRUSHER", "1,200 tph · tip-off bay", "#f2a623");
+facility(1000, 46, 118, 34, "ORE STOCKYARD", null, "#c1613f");
+facility(886, 218, 40, 18, "WEIGHBRIDGE", null, "#4d9bea");
+facility(628, 556, 112, 54, "HEMM WORKSHOP", "bays 1–6", "#4d9bea");
+facility(284, 700, 104, 42, "CONTROL ROOM", "FogGuard AI server", "#2dd4a7");
+facility(1058, 676, 74, 34, "MAGAZINE", "keep-out 90 m", "#ef5350");
+
+/* rail siding */
+el("line", {x1:930, y1:36, x2:1180, y2:36, stroke:"#4c5560", "stroke-width":2}, LAYERS.facilities);
+for (var rx = 934; rx < 1180; rx += 12)
+  el("line", {x1:rx, y1:30, x2:rx, y2:42, stroke:"#39434f", "stroke-width":1.4}, LAYERS.facilities);
+
+/* fuel farm */
+[0,1,2].forEach(function(i){
+  el("circle", {cx:762 + i*24, cy:600, r:9, fill:"#1b222c", stroke:"#c1613f", "stroke-width":1}, LAYERS.facilities);
+});
+el("text", {x:786, y:628, fill:"#8a7263", "font-size":"8.5", "font-family":"IBM Plex Mono",
+  "text-anchor":"middle", "class":"maplabel"}, LAYERS.labels).textContent = "FUEL FARM";
+
+/* magazine keep-out */
+el("circle", {cx:1095, cy:693, r:64, fill:"none", stroke:"#5c2b2e",
+  "stroke-width":1, "stroke-dasharray":"5 6", opacity:.7}, LAYERS.facilities);
+
+/* gate */
+el("rect", {x:236, y:738, width:26, height:14, rx:2, fill:"#161d27", stroke:"#48545f"}, LAYERS.facilities);
+el("text", {x:249, y:766, fill:"#5b6673", "font-size":"8", "font-family":"IBM Plex Mono",
+  "text-anchor":"middle", "class":"maplabel"}, LAYERS.labels).textContent = "MAIN GATE";
+
+/* static plant: shovel + dozer */
+function plantIcon(x, y, id, role, colour){
+  var g = el("g", {transform:"translate(" + x + "," + y + ")"}, LAYERS.facilities);
+  el("rect", {x:-9, y:-6, width:18, height:12, rx:2, fill:colour, opacity:.9}, g);
+  el("rect", {x:-13, y:-1, width:9, height:4, rx:1, fill:colour, opacity:.6}, g);
+  var t = el("text", {x:x, y:y - 13, fill:"#98a3af", "font-size":"8.5",
+    "font-family":"IBM Plex Mono", "text-anchor":"middle", "class":"maplabel"}, LAYERS.labels);
+  t.textContent = id + " · " + role;
+  return g;
+}
+plantIcon(238, 452, "EX-01", "loading", "#c1613f");
+plantIcon(1000, 512, "DZ-05", "spreading", "#c1613f");
+
+/* route name labels */
+[[820,286,"HAUL ROAD 1 — ORE"],[912,430,"HAUL ROAD 2 — OB"],[688,660,"SERVICE ROAD"],[330,252,"PIT RIM ROAD"]]
+  .forEach(function(l){
+    el("text", {x:l[0], y:l[1], fill:"#59646f", "font-size":"8.5", "font-family":"IBM Plex Mono",
+      "text-anchor":"middle", "letter-spacing":".5", "class":"maplabel"}, LAYERS.labels).textContent = l[2];
+  });
+
+el("text", {x:1000, y:690, fill:"#6d7783", "font-size":"9.5", "font-family":"IBM Plex Mono",
+  "text-anchor":"middle", "class":"maplabel"}, LAYERS.labels).textContent = "WASTE DUMP — RL 300";
+el("text", {x:330, y:222, fill:"#6d7783", "font-size":"10", "font-family":"IBM Plex Mono",
+  "text-anchor":"middle", "letter-spacing":"1.4", "class":"maplabel"}, LAYERS.labels).textContent = "MAIN PIT";
+
+/* ---------- 3. fog zones ---------- */
+
+var ZONES = [
+  {id:"A", name:"Pit & ramp",       cx:340, cy:462, r:216, severity:1},
+  {id:"B", name:"Haul road junction", cx:790, cy:300, r:178, severity:3},
+  {id:"C", name:"Dump approach",    cx:948, cy:478, r:166, severity:1},
+  {id:"D", name:"Workshop & service", cx:664, cy:606, r:150, severity:0}
+];
+
+var fogGroup = el("g", {filter:"url(#fogBlur)", opacity:.9}, LAYERS.fog);
+ZONES.forEach(function(z){
+  z.fill = el("circle", {cx:z.cx, cy:z.cy, r:z.r, fill:"#2dd4a7", opacity:.12}, fogGroup);
+  z.ring = el("circle", {cx:z.cx, cy:z.cy, r:z.r, fill:"none", stroke:"#2dd4a7",
+    "stroke-width":1, "stroke-dasharray":"6 8", opacity:.3}, LAYERS.fog);
+  z.tag = el("text", {x:z.cx, y:z.cy - z.r + 16, fill:"#7c8794", "font-size":"9",
+    "font-family":"IBM Plex Mono", "text-anchor":"middle", "class":"maplabel"}, LAYERS.labels);
+  z.tag.textContent = "ZONE " + z.id;
+});
+
+function severityColor(s){
+  if (s <= 1) return "#2dd4a7";
+  if (s === 2) return "#f2a623";
+  if (s === 3) return "#ff9040";
+  return "#ef5350";
+}
+function severityLabel(s){
+  return ["Normal","Normal","Advisory","Speed cap","Convoy","Hold"][clamp(s,0,5)];
+}
+function severityClass(s){
+  return ["normal","normal","advisory","capped","convoy","halt"][clamp(s,0,5)];
+}
+function speedFactor(s){
+  return [1, 1, .78, .55, .34, .10][clamp(s,0,5)];
+}
+var VIS_M = [520, 340, 185, 95, 45, 18];
+
+function paintZones(){
+  ZONES.forEach(function(z){
+    var c = severityColor(z.severity);
+    z.fill.setAttribute("fill", c);
+    z.fill.setAttribute("opacity", (0.05 + z.severity * 0.035).toFixed(3));
+    z.fill.setAttribute("r", z.r * (0.82 + z.severity * 0.036));
+    z.ring.setAttribute("stroke", c);
+    z.ring.setAttribute("opacity", z.severity >= 3 ? .45 : .22);
+  });
+  renderZonePanel();
+}
+
+function zoneAt(x, y){
+  var best = null, bs = -1;
+  for (var i = 0; i < ZONES.length; i++){
+    var z = ZONES[i];
+    if (dist(x, y, z.cx, z.cy) < z.r && z.severity > bs){ bs = z.severity; best = z; }
+  }
+  return best;
+}
+
+/* ---------- 4. roadside units ---------- */
+
+var RSUS = [
+  {id:"RSU-01", name:"Pit exit",    x:RAMP_END[0]-16, y:RAMP_END[1]+26, r:212},
+  {id:"RSU-02", name:"Junction",    x:792, y:296, r:208},
+  {id:"RSU-03", name:"Dump access", x:944, y:462, r:190},
+  {id:"RSU-04", name:"Service road",x:660, y:600, r:186},
+  {id:"RSU-05", name:"Crusher",     x:1004,y:160, r:178},
+  {id:"RSU-06", name:"Pit floor",   x:318, y:472, r:196}
+];
+
+RSUS.forEach(function(r){
+  r.up = true;
+  r.clients = 0;
+  var g = el("g", {transform:"translate(" + r.x + "," + r.y + ")"}, LAYERS.rsu);
+  r.cover = el("circle", {cx:0, cy:0, r:r.r, fill:"none", stroke:"#4d9bea",
+    "stroke-width":.9, "stroke-dasharray":"3 9", opacity:.16}, g);
+  el("polygon", {points:"0,-13 5,4 -5,4", fill:"#4d9bea", opacity:.9}, g);
+  el("rect", {x:-7, y:4, width:14, height:5, rx:1.5, fill:"#25303c", stroke:"#4d9bea", "stroke-width":.8}, g);
+  var pulse = el("circle", {cx:0, cy:-13, r:4, fill:"none", stroke:"#4d9bea", "stroke-width":1}, g);
+  el("animate", {attributeName:"r", values:"4;26;4", dur:"3.4s", repeatCount:"indefinite"}, pulse);
+  el("animate", {attributeName:"opacity", values:".55;0;.55", dur:"3.4s", repeatCount:"indefinite"}, pulse);
+  var t = el("text", {x:r.x, y:r.y + 22, fill:"#5c8cb8", "font-size":"8",
+    "font-family":"IBM Plex Mono", "text-anchor":"middle", "class":"maplabel"}, LAYERS.labels);
+  t.textContent = r.id;
+  r.g = g;
+});
+
+/* ---------- 5. fleet ---------- */
+
+var FLEET = [
+  {id:"D-07",  model:"BEML BH60",  cls:"haul",  route:"ORE",   p:.10, dir:1,  kmh:32, payload:60, op:"S. Pawar"},
+  {id:"D-12",  model:"BEML BH60",  cls:"haul",  route:"ORE",   p:.55, dir:-1, kmh:30, payload:60, op:"R. Jadhav"},
+  {id:"D-21",  model:"CAT 777E",   cls:"haul",  route:"ORE",   p:.34, dir:1,  kmh:33, payload:90, op:"A. Khandare"},
+  {id:"D-33",  model:"BEML BH60",  cls:"haul",  route:"ORE",   p:.78, dir:-1, kmh:31, payload:60, op:"M. Deshmukh"},
+  {id:"D-03",  model:"BEML BH60",  cls:"haul",  route:"WASTE", p:.28, dir:1,  kmh:30, payload:60, op:"V. Sonawane"},
+  {id:"D-18",  model:"CAT 777E",   cls:"haul",  route:"WASTE", p:.66, dir:-1, kmh:32, payload:90, op:"P. Gaikwad"},
+  {id:"D-09",  model:"BEML BH60",  cls:"haul",  route:"WASTE", p:.12, dir:1,  kmh:29, payload:60, op:"N. Bhoir"},
+  {id:"WT-02", model:"Water tanker",cls:"haul", route:"ORE",   p:.46, dir:1,  kmh:24, payload:28, op:"K. Thorat"},
+  {id:"LV-01", model:"Pickup",     cls:"light", route:"RIM",   p:.20, dir:1,  kmh:44, payload:0,  op:"D. Patil (safety)"},
+  {id:"LV-04", model:"Pickup",     cls:"light", route:"SVC",   p:.60, dir:-1, kmh:42, payload:0,  op:"S. More (electrical)"}
+];
+
+var PX_PER_MS = 0.0011;   /* map units per ms per km/h — a full haul cycle ≈ 2 min at 1× */
+var vehIndex = {};
+
+FLEET.forEach(function(v){
+  v.trips = Math.floor(2 + Math.random() * 5);
+  v.severity = 0;
+  v.speed = v.kmh;
+  v.linked = true;
+  v.rsu = RSUS[0];
+  v.linkInit = false;
+  v.rssi = -60;
+  v.lat = 32;
+  v.cmd = null;
+
+  var g = el("g", {"class":"veh"}, LAYERS.vehicles);
+  v.halo = el("circle", {r:14, fill:"#2dd4a7", opacity:.13}, g);
+  var body = el("g", {}, g);
+
+  if (v.cls === "light"){
+    v.shape = el("rect", {x:-7, y:-4, width:14, height:8, rx:2.5, fill:"#4d9bea", stroke:"#070a0f", "stroke-width":1.4}, body);
+  } else {
+    v.shape = el("rect", {x:-12, y:-6, width:24, height:12, rx:2.5, fill:"#2dd4a7", stroke:"#070a0f", "stroke-width":1.4}, body);
+    el("polygon", {points:"-11,-6 5,-6 2,-1 -11,-1", fill:"#0b0f14", opacity:.45}, body);
+  }
+  el("rect", {x: v.cls === "light" ? 4 : 7, y:-3, width:3, height:6, rx:1, fill:"#0b0f14", opacity:.6}, body);
+
+  v.body = body;
+  v.label = el("text", {y:-17, "text-anchor":"middle", "font-size":"9",
+    "font-family":"IBM Plex Mono", fill:"#a5afb9"}, g);
+  v.label.textContent = v.id;
+  v.g = g;
+  g.style.cursor = "pointer";
+  g.addEventListener("click", function(){ selectVehicle(v.id); });
+
+  v.link = el("line", {stroke:"#4d9bea", "stroke-width":.9, "stroke-dasharray":"3 5", opacity:0}, LAYERS.links);
+  vehIndex[v.id] = v;
+});
+
+/* person on foot */
+var ped = {p:0, dir:1, speed:0.00016, x:0, y:0};
+var pedG = el("g", {}, LAYERS.vehicles);
+el("circle", {r:13, fill:"#4d9bea", opacity:.14}, pedG);
+el("circle", {r:5, fill:"#4d9bea", stroke:"#070a0f", "stroke-width":1.6}, pedG);
+el("text", {y:-14, "text-anchor":"middle", "font-size":"8.5", "font-family":"IBM Plex Mono",
+  fill:"#7fb4e8"}, pedG).textContent = "SURVEY CREW";
+
+/* ---------- 6. V2I message stack ---------- */
+
+var TYPES = {
+  CAM:      {label:"POSITION", colour:"#5b6673", prio:4},
+  SPD_ADV:  {label:"SPEED ADV", colour:"#f2a623", prio:2},
+  CONVOY:   {label:"CONVOY", colour:"#ff9040", prio:1},
+  HALT:     {label:"HOLD", colour:"#ef5350", prio:1},
+  REROUTE:  {label:"REROUTE", colour:"#9b7cff", prio:2},
+  PED_WARN: {label:"PERSON ON ROAD", colour:"#ef5350", prio:1},
+  PROX:     {label:"PROXIMITY", colour:"#ef5350", prio:1},
+  GEO:      {label:"ZONE ENTRY", colour:"#4d9bea", prio:3},
+  ACK:      {label:"ACK", colour:"#2dd4a7", prio:4},
+  TRIP:     {label:"TRIP", colour:"#2dd4a7", prio:3},
+  LINK:     {label:"LINK", colour:"#84909d", prio:3},
+  RESUME:   {label:"RESUME", colour:"#2dd4a7", prio:2},
+  TXT:      {label:"MESSAGE", colour:"#4d9bea", prio:2},
+  SOS:      {label:"EMERGENCY", colour:"#ef5350", prio:1}
+};
+
+var msgs = [], msgSeq = 0;
+var txCount = 0, rxCount = 0, latSamples = [], lostCount = 0;
+var feedDirty = true, listDirty = true;
+
+function stamp(){
+  var d = new Date();
+  return d.toLocaleTimeString("en-GB", {hour12:false}) + "." + String(d.getMilliseconds()).padStart(3, "0");
+}
+
+function pushMsg(m){
+  m.id = "m" + (++msgSeq);
+  m.time = stamp();
+  m.prio = m.prio || (TYPES[m.type] ? TYPES[m.type].prio : 3);
+  msgs.unshift(m);
+  if (msgs.length > 160) msgs.pop();
+  feedDirty = true;
+  if (m.prio === 1) beep(m.type === "HALT" || m.type === "SOS" ? 220 : 660);
+  return m;
+}
+
+function rsuFor(v){
+  return v && v.rsu ? v.rsu : RSUS[1];
+}
+
+/* infrastructure → vehicle, with delivery + acknowledgement */
+function sendDL(vehId, type, body, prio){
+  var v = vehIndex[vehId];
+  var rsu = rsuFor(v);
+  var m = pushMsg({
+    dir:"DL", from: rsu.id, to: vehId, type:type, body:body, prio:prio,
+    rssi: v ? v.rssi : -70, lat: v ? v.lat : 40, status:"TX"
+  });
+  txCount++;
+  if (v && !v.linked){
+    setTimeout(function(){ m.status = "LOST"; lostCount++; feedDirty = true; }, 700);
+    return m;
+  }
+  setTimeout(function(){ m.status = "DLVD"; feedDirty = true; }, m.lat + 80);
+  setTimeout(function(){
+    if (Math.random() < 0.05){ m.status = "LOST"; lostCount++; feedDirty = true; return; }
+    m.status = "ACK"; feedDirty = true;
+    latSamples.push(m.lat); if (latSamples.length > 60) latSamples.shift();
+    rxCount++;
+    pushMsg({dir:"UL", from:vehId, to:rsu.id, type:"ACK",
+      body: TYPES[type] ? TYPES[type].label.toLowerCase() + " accepted by operator" : "accepted",
+      prio:4, rssi:m.rssi, lat:m.lat, status:"ACK"});
+  }, m.lat + 380 + Math.random() * 600);
+  return m;
+}
+
+function broadcast(rsuId, type, body, prio, scope){
+  txCount++;
+  return pushMsg({dir:"BC", from:rsuId, to: scope || "ALL UNITS", type:type,
+    body:body, prio:prio, rssi:-52, lat:18, status:"DLVD"});
+}
+
+function sendUL(vehId, type, body, prio){
+  var v = vehIndex[vehId];
+  if (v && !v.linked) return null;
+  rxCount++;
+  return pushMsg({dir:"UL", from:vehId, to: rsuFor(v).id, type:type, body:body,
+    prio:prio, rssi: v ? v.rssi : -65, lat: v ? v.lat : 35, status:"ACK"});
+}
+
+/* commands change how the truck actually drives */
+function applyCmd(v, kind){
+  if (kind === "RESUME"){ v.cmd = null; return; }
+  v.cmd = {kind:kind, until: Date.now() + 90000};
+}
+function cmdFactor(v){
+  if (!v.cmd) return 1;
+  if (Date.now() > v.cmd.until){ v.cmd = null; return 1; }
+  if (v.cmd.kind === "HALT") return 0;
+  if (v.cmd.kind === "CONVOY") return .3;
+  return .45;
+}
+
+/* ---------- alerts ---------- */
+
+var alerts = [], reroutes = 0;
+
+function addAlert(text, level){
+  alerts.unshift({text:text, level: level || "low", time:new Date().toLocaleTimeString("en-GB",{hour12:false}), ackd:false});
+  if (alerts.length > 60) alerts.pop();
+  renderAlerts();
+}
+
+/* ---------- sound ---------- */
+
+var sound = false, audioCtx = null;
+function beep(freq){
+  if (!sound) return;
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    var o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.frequency.value = freq; o.type = "square";
+    g.gain.setValueAtTime(.05, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.0001, audioCtx.currentTime + .22);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(); o.stop(audioCtx.currentTime + .24);
+  } catch (e){ /* audio unavailable */ }
+}
+
+/* ---------- 7. rendering ---------- */
+
+var selectedId = null, filter = "all";
+var feedFilters = {hb:true, p1:false, cmd:false};
+var activeTab = "msg";
+
+function esc(s){ return String(s).replace(/[&<>]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;"}[c]; }); }
+
+function renderFleetList(){
+  var list = $("vehicleList");
+  var rows = FLEET.filter(function(v){
+    if (filter === "all") return true;
+    if (filter === "risk") return v.severity >= 2 || v.cmd || !v.linked;
+    return v.cls === filter;
+  });
+
+  $("fleetCount").textContent = FLEET.length;
+
+  list.innerHTML = rows.map(function(v){
+    var badge = v.cmd ? '<span class="badge cmd">' + v.cmd.kind + "</span>"
+                      : '<span class="badge ' + severityClass(v.severity) + '">' + severityLabel(v.severity) + "</span>";
+    var link = v.linked
+      ? '<span>' + v.rsu.id + " · " + v.rssi + " dBm</span><span>" + v.lat + " ms</span>"
+      : '<span style="color:#ef5350">link lost</span><span>--</span>';
+    return '<div class="vehicle ' + (v.id === selectedId ? "selected" : "") + '" data-id="' + v.id + '">'
+      + '<div class="veh-top"><span class="veh-id">' + v.id + "</span>" + badge + "</div>"
+      + '<div class="veh-sub"><span>' + esc(v.model) + "</span><span><b>" + Math.round(v.speed) + "</b> km/h</span></div>"
+      + '<div class="veh-sub"><span>' + esc(v.op) + "</span><span><b>" + v.trips + "</b> trips</span></div>"
+      + '<div class="veh-link">' + link + "</div></div>";
+  }).join("");
+}
+
+$("vehicleList").addEventListener("click", function(e){
+  var row = e.target.closest(".vehicle");
+  if (row) selectVehicle(row.dataset.id);
+});
+
+function renderZonePanel(){
+  $("zones").innerHTML = ZONES.map(function(z){
+    var c = severityColor(z.severity);
+    return '<div class="zone"><div class="zone-head"><span>Zone ' + z.id + " · " + z.name + "</span>"
+      + '<b style="color:' + c + '">' + z.severity + "/5 " + severityLabel(z.severity).toLowerCase() + "</b></div>"
+      + '<div class="bar"><div class="bar-fill" style="width:' + (z.severity * 20) + "%;background:" + c + '"></div></div></div>';
+  }).join("");
+}
+
+function renderRsuStrip(){
+  $("rsuStrip").innerHTML = RSUS.map(function(r){
+    return '<div class="rsu-chip ' + (r.up ? "up" : "down") + '" title="' + r.name + '"><b>' + r.id + "</b>"
+      + (r.up ? r.clients + " linked" : "offline") + "</div>";
+  }).join("");
+}
+
+function passesFeedFilter(m){
+  if (feedFilters.p1 && m.prio !== 1) return false;
+  if (!feedFilters.hb && (m.type === "CAM" || m.type === "ACK")) return false;
+  if (feedFilters.cmd && ["SPD_ADV","CONVOY","HALT","REROUTE","RESUME","TXT"].indexOf(m.type) === -1) return false;
+  return true;
+}
+
+function renderFeed(){
+  var shown = msgs.filter(passesFeedFilter).slice(0, 45);
+  $("msgCount").textContent = msgs.length;
+  $("feed").innerHTML = shown.map(function(m){
+    var t = TYPES[m.type] || {label:m.type, colour:"#84909d"};
+    var dirClass = m.dir === "UL" ? "ul" : m.dir === "BC" ? "bc" : "dl";
+    return '<div class="msg p' + m.prio + '">'
+      + '<div class="msg-top"><span class="dirtag ' + dirClass + '">' + m.dir + "</span>"
+      + '<span class="msg-route">' + esc(m.from) + " → " + esc(m.to) + "</span>"
+      + '<span class="msg-time">' + m.time + "</span></div>"
+      + '<div class="msg-body">' + esc(m.body) + "</div>"
+      + '<div class="msg-meta"><span class="msg-type" style="color:' + t.colour + '">' + t.label + "</span>"
+      + "<span>" + m.rssi + " dBm</span><span>" + m.lat + " ms</span>"
+      + '<span class="st ' + m.status + '">' + m.status + "</span></div></div>";
+  }).join("") || '<div style="padding:22px 14px;color:#4e5966;font-size:10px">No messages match this filter.</div>';
+}
+
+function renderAlerts(){
+  $("alertCount").textContent = alerts.length;
+  $("alertsFeed").innerHTML = alerts.slice(0, 40).map(function(a, i){
+    return '<div class="alert ' + a.level + (a.ackd ? " ackd" : "") + '" data-i="' + i + '">'
+      + '<span class="ack">ACK</span><div class="alert-time">' + a.time + "</div>"
+      + '<div class="alert-text">' + esc(a.text) + "</div></div>";
+  }).join("");
+}
+
+$("alertsFeed").addEventListener("click", function(e){
+  var row = e.target.closest(".alert");
+  if (row){ alerts[+row.dataset.i].ackd = true; renderAlerts(); }
+});
+
+function selectVehicle(id){
+  selectedId = id;
+  var v = vehIndex[id];
+  if (!v) return;
+  listDirty = true;
+  $("vehicleInfo").classList.add("show");
+  $("infoId").textContent = v.id;
+  $("infoSub").textContent = v.model + " · " + v.op;
+  $("infoRoute").textContent = ROUTES[v.route].label;
+  $("infoPayload").textContent = v.payload ? v.payload + " t" : "—";
+  updateInfoCard();
+}
+
+function updateInfoCard(){
+  var v = vehIndex[selectedId];
+  if (!v) return;
+  $("infoSpeed").textContent = Math.round(v.speed) + " km/h";
+  $("infoSeverity").textContent = v.severity + " / 5 · " + severityLabel(v.severity).toLowerCase();
+  $("infoTrips").textContent = v.trips;
+  $("infoLink").textContent = v.linked ? v.rsu.id + " " + v.rssi : "no coverage";
+}
+
+/* ---------- 8. simulation ---------- */
+
+var live = true, timeScale = 1, showFog = true, showLabels = true;
+var lastT = performance.now();
+var tonnes = 12480, trips = 168, targetTonnes = 26000, incidents = 0;
+var listTimer = 0, feedTimer = 0, hbTimer = 0, proxTimer = 0, pedTimer = 0, driftTimer = 0;
+
+function pointOn(route, p){
+  var r = ROUTES[route];
+  return r.guide.getPointAtLength(clamp(p, 0, 1) * r.len);
+}
+
+function updateLink(v, x, y){
+  var best = null, bd = Infinity;
+  RSUS.forEach(function(r){
+    if (!r.up) return;
+    var d = dist(x, y, r.x, r.y);
+    if (d < r.r && d < bd){ bd = d; best = r; }
+  });
+  var was = v.linked;
+  v.rsu = best || v.rsu || RSUS[0];
+  v.linked = !!best;
+  if (best){
+    var f = bd / best.r;
+    v.rssi = Math.round(-46 - 44 * f);
+    v.lat = Math.round(14 + 58 * f + Math.random() * 6);
+    best.clients++;
+  }
+  if (!v.linkInit){ v.linkInit = true; return; }
+
+  if (was && !v.linked){
+    pushMsg({dir:"UL", from:v.id, to:"CTRL", type:"LINK", body:v.id + " lost roadside coverage — falling back to mine radio channel 3",
+      prio:3, rssi:-98, lat:0, status:"LOST"});
+    addAlert(v.id + " out of V2I coverage", "mid");
+  } else if (!was && v.linked){
+    pushMsg({dir:"UL", from:v.id, to:v.rsu.id, type:"LINK", body:v.id + " re-joined " + v.rsu.id + " (" + v.rsu.name.toLowerCase() + ")",
+      prio:4, rssi:v.rssi, lat:v.lat, status:"ACK"});
+  }
+}
+
+function tripComplete(v, atCrusher){
+  v.trips++;
+  trips++;
+  if (v.model === "Water tanker"){
+    sendUL(v.id, "TRIP", atCrusher
+      ? "Dust suppression run complete on haul road 1 — returning to fill point"
+      : "Refilled 28 kl at the pit sump — starting sprinkling run", 3);
+    return;
+  }
+  if (atCrusher && v.payload && v.cls === "haul" && v.route === "ORE"){
+    tonnes += v.payload;
+    sendUL(v.id, "TRIP", "Tip-off complete at primary crusher — " + v.payload + " t, ticket " + (4100 + trips), 3);
+  } else if (!atCrusher){
+    sendUL(v.id, "TRIP", "Loaded by EX-01 at RL 210 — " + (v.payload || 0) + " t, departing pit", 3);
+  } else if (v.route === "WASTE"){
+    sendUL(v.id, "TRIP", "Overburden dumped at RL 300 lift 2 — " + v.payload + " t", 3);
+  }
+}
+
+function step(dt){
+  RSUS.forEach(function(r){ r.clients = 0; });
+
+  FLEET.forEach(function(v){
+    var r = ROUTES[v.route];
+    var pt = pointOn(v.route, v.p);
+
+    var z = zoneAt(pt.x, pt.y);
+    var sev = showFog && z ? z.severity : 0;
+
+    if (z && v.lastZone !== (z ? z.id : null) && sev >= 2 && v.linked){
+      sendDL(v.id, "GEO", "Entering zone " + z.id + " (" + z.name.toLowerCase() + "), severity " + sev
+        + " — " + severityLabel(sev).toLowerCase() + " in force", sev >= 4 ? 1 : 3);
+    }
+    v.lastZone = z ? z.id : null;
+    v.severity = sev;
+
+    updateLink(v, pt.x, pt.y);
+
+    var f = Math.min(speedFactor(sev), cmdFactor(v));
+    v.speed = v.kmh * f;
+
+    v.p += v.dir * v.kmh * PX_PER_MS * f * dt * timeScale / r.len;
+
+    if (r.closed){
+      if (v.p > 1) v.p -= 1;
+      if (v.p < 0) v.p += 1;
+    } else {
+      if (v.p >= 1){ v.p = 1; v.dir = -1; if (v.cls === "haul") tripComplete(v, true); }
+      if (v.p <= 0){ v.p = 0; v.dir = 1;  if (v.cls === "haul") tripComplete(v, false); }
+    }
+
+    var p1 = pointOn(v.route, v.p);
+    var p2 = pointOn(v.route, clamp(v.p + 0.004 * v.dir, 0, 1));
+    var ang = Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180 / Math.PI;
+
+    v.x = p1.x; v.y = p1.y;
+    v.g.setAttribute("transform", "translate(" + p1.x.toFixed(1) + "," + p1.y.toFixed(1) + ")");
+    v.body.setAttribute("transform", "rotate(" + ang.toFixed(1) + ")");
+
+    var col = v.cmd ? (v.cmd.kind === "HALT" ? "#ef5350" : "#9b7cff")
+                    : (v.cls === "light" ? "#4d9bea" : severityColor(sev));
+    v.shape.setAttribute("fill", col);
+    v.halo.setAttribute("fill", col);
+    v.halo.setAttribute("r", v.id === selectedId ? 20 : 14);
+    v.halo.setAttribute("opacity", v.id === selectedId ? .3 : (sev >= 3 ? .22 : .12));
+
+    if (v.linked){
+      v.link.setAttribute("x1", p1.x); v.link.setAttribute("y1", p1.y);
+      v.link.setAttribute("x2", v.rsu.x); v.link.setAttribute("y2", v.rsu.y);
+      v.link.setAttribute("opacity", v.severity >= 3 ? .34 : .16);
+      v.link.setAttribute("stroke", v.severity >= 4 ? "#ef5350" : "#4d9bea");
+    } else {
+      v.link.setAttribute("opacity", 0);
+    }
+  });
+
+  /* person on foot along the walkway */
+  ped.p += ped.dir * ped.speed * dt * timeScale;
+  if (ped.p >= 1){ ped.p = 1; ped.dir = -1; }
+  if (ped.p <= 0){ ped.p = 0; ped.dir = 1; }
+  var pp = walkPath.getPointAtLength(ped.p * WALK_LEN);
+  ped.x = pp.x; ped.y = pp.y;
+  pedG.setAttribute("transform", "translate(" + pp.x.toFixed(1) + "," + pp.y.toFixed(1) + ")");
+
+  /* fog drift — throttled, the blur filter is expensive to re-rasterise */
+  var now2 = performance.now();
+  if (now2 - driftTimer > 500){
+    driftTimer = now2;
+    var t = now2 / 1000;
+    fogGroup.setAttribute("transform",
+      "translate(" + (Math.sin(t/7)*9).toFixed(1) + "," + (Math.cos(t/9)*6).toFixed(1) + ")");
+  }
+}
+
+/* hazard detection → V2I traffic */
+function hazardScan(now){
+  if (now - pedTimer > 9000){
+    FLEET.forEach(function(v){
+      if (v.cls !== "haul" || !v.linked) return;
+      if (dist(v.x, v.y, ped.x, ped.y) < 115){
+        pedTimer = now;
+        broadcast("RSU-02", "PED_WARN",
+          "Survey crew on foot at the crusher approach crossing — " + v.id + " within 90 m, hold at the crossing", 1,
+          "units near RSU-02");
+        sendDL(v.id, "PED_WARN", "Person detected on your path by roadside LiDAR — stop before the crossing", 1);
+        addAlert("Person on foot near " + v.id + " at crusher crossing", "high");
+      }
+    });
+  }
+
+  if (now - proxTimer > 7000){
+    for (var i = 0; i < FLEET.length; i++){
+      for (var j = i + 1; j < FLEET.length; j++){
+        var a = FLEET[i], b = FLEET[j];
+        if (a.route !== b.route) continue;
+        if (dist(a.x, a.y, b.x, b.y) < 46 && a.severity >= 2){
+          proxTimer = now;
+          sendDL(a.id, "PROX", "Vehicle " + b.id + " at " + Math.round(dist(a.x,a.y,b.x,b.y) * M_PER_UNIT)
+            + " m ahead in low visibility — increase gap to 60 m", 1);
+          addAlert("Close following: " + a.id + " behind " + b.id, "high");
+          return;
+        }
+      }
+    }
+  }
+
+  if (now - hbTimer > 2200){
+    hbTimer = now;
+    var linked = FLEET.filter(function(v){ return v.linked; });
+    if (linked.length){
+      var v = linked[Math.floor(Math.random() * linked.length)];
+      sendUL(v.id, "CAM", "Position beacon · " + Math.round(v.speed) + " km/h · "
+        + (v.route === "RIM" ? "rim road" : ROUTES[v.route].label.toLowerCase())
+        + " · heading " + Math.round(Math.random() * 359) + "°", 4);
+    }
+  }
+}
+
+/* ---------- metrics ---------- */
+
+function updateMetrics(){
+  var peak = Math.max.apply(null, ZONES.map(function(z){ return z.severity; }));
+  $("visibility").textContent = VIS_M[peak] + " m";
+  $("visibility").className = peak >= 4 ? "red" : peak >= 2 ? "yellow" : "green";
+
+  var pk = $("peak");
+  pk.textContent = peak + " / 5";
+  pk.className = peak >= 4 ? "red" : peak >= 2 ? "yellow" : "green";
+
+  var linked = FLEET.filter(function(v){ return v.linked; }).length;
+  $("activeFleet").textContent = linked + " / " + FLEET.length;
+
+  var safe = FLEET.filter(function(v){ return v.severity <= 1 && !v.cmd; }).length;
+  var risk = FLEET.filter(function(v){ return (v.severity === 2 || v.severity === 3) && !v.cmd; }).length;
+  var conv = FLEET.filter(function(v){ return v.severity >= 4 || (v.cmd && v.cmd.kind !== "CAP"); }).length;
+
+  $("kpiSafe").textContent = safe;
+  $("kpiRisk").textContent = risk;
+  $("kpiConvoy").textContent = conv;
+  $("kpiLinked").textContent = linked;
+
+  var avg = FLEET.reduce(function(s, v){ return s + v.speed / v.kmh; }, 0) / FLEET.length;
+  $("bSpeedRed").textContent = Math.round((1 - avg) * 100) + "%";
+  $("bTonnes").textContent = tonnes.toLocaleString("en-IN") + " t";
+  $("bTrips").textContent = trips;
+  var pct = Math.round(tonnes / targetTonnes * 100);
+  $("bTarget").textContent = pct + "%";
+  $("bTarget").className = pct >= 70 ? "green" : pct >= 45 ? "yellow" : "red";
+  $("bConvoy").textContent = conv;
+  $("bReroutes").textContent = reroutes;
+  $("bMsgs").textContent = txCount + rxCount;
+  $("bIncidents").textContent = incidents;
+
+  var health = Math.round(linked / FLEET.length * 100);
+  $("bLink").textContent = health + "%";
+  $("bLink").className = health >= 90 ? "green" : health >= 70 ? "yellow" : "red";
+
+  $("statTx").textContent = txCount;
+  $("statRx").textContent = rxCount;
+  var la = latSamples.length ? Math.round(latSamples.reduce(function(a,b){return a+b;},0)/latSamples.length) : 0;
+  $("statLat").textContent = la + " ms";
+  $("statLat").className = la < 60 ? "green" : la < 110 ? "yellow" : "red";
+  var loss = txCount ? (lostCount / txCount * 100) : 0;
+  $("statLoss").textContent = loss.toFixed(1) + "%";
+  $("statLoss").className = loss < 2 ? "green" : loss < 6 ? "yellow" : "red";
+  $("statLinks").textContent = linked + "/" + FLEET.length;
+}
+
+/* ---------- loop ---------- */
+
+function frame(now){
+  var dt = Math.min(now - lastT, 60);
+  lastT = now;
+
+  if (live){
+    step(dt);
+    hazardScan(now);
+  }
+
+  if (now - listTimer > 420){
+    listTimer = now;
+    if (listDirty || live){ renderFleetList(); renderRsuStrip(); updateMetrics(); updateInfoCard(); listDirty = false; }
+  }
+  if (now - feedTimer > 260){
+    feedTimer = now;
+    if (feedDirty && activeTab === "msg"){ renderFeed(); feedDirty = false; }
+  }
+  requestAnimationFrame(frame);
+}
+
+/* ---------- fog drift engine ---------- */
+
+var autoFog = true;
+
+function setZoneSeverity(z, next, source){
+  next = clamp(next, 0, 5);
+  if (next === z.severity) return;
+  var prev = z.severity;
+  z.severity = next;
+
+  var level = next >= 4 ? "high" : next >= 2 ? "mid" : "low";
+  addAlert("Zone " + z.id + " " + z.name.toLowerCase() + ": severity " + prev + " → " + next
+    + " (" + severityLabel(next).toLowerCase() + ")" + (source ? " · " + source : ""), level);
+
+  var rsu = RSUS.reduce(function(best, r){
+    return dist(r.x, r.y, z.cx, z.cy) < dist(best.x, best.y, z.cx, z.cy) ? r : best;
+  }, RSUS[0]);
+
+  if (next >= 2){
+    var cap = [0,0,25,15,10,0][next];
+    broadcast(rsu.id, next >= 4 ? "CONVOY" : "SPD_ADV",
+      "Zone " + z.id + " visibility " + VIS_M[next] + " m — "
+      + (next >= 5 ? "all haulage to hold at the nearest siding"
+        : next === 4 ? "form convoy behind lead vehicle, 10 km/h, lights on"
+        : "speed cap " + cap + " km/h, headlights and beacons on"),
+      next >= 4 ? 1 : 2, "units in zone " + z.id);
+
+    FLEET.forEach(function(v){
+      if (v.lastZone === z.id && v.linked){
+        sendDL(v.id, next >= 5 ? "HALT" : next >= 4 ? "CONVOY" : "SPD_ADV",
+          next >= 5 ? "Hold position — visibility below 20 m in zone " + z.id
+            : next >= 4 ? "Join convoy, keep 30 m from the unit ahead"
+            : "Reduce to " + cap + " km/h for zone " + z.id,
+          next >= 4 ? 1 : 2);
+      }
+    });
+  }
+
+  if (next >= 4 && prev < 4){
+    reroutes++;
+    broadcast(rsu.id, "REROUTE", "Dispatch rerouting empty units away from zone " + z.id
+      + " via the rim road until visibility recovers", 2, "empty units");
+    addAlert("Dispatch rerouted traffic around zone " + z.id, "high");
+  }
+  if (next <= 1 && prev >= 2){
+    broadcast(rsu.id, "RESUME", "Zone " + z.id + " clear — normal speed limits restored", 2, "units in zone " + z.id);
+  }
+  paintZones();
+}
+
+setInterval(function(){
+  if (!live || !autoFog) return;
+  ZONES.forEach(function(z){
+    if (Math.random() < 0.55) return;
+    setZoneSeverity(z, z.severity + (Math.floor(Math.random() * 3) - 1), "sensor fusion");
+  });
+}, 4200);
+
+/* ---------- weather + clock ---------- */
+
+var COMPASS = ["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"];
+function updateWeather(){
+  var w = (4 + Math.random() * 15).toFixed(1);
+  $("windEl").textContent = w + " km/h " + COMPASS[Math.floor(Math.random() * 16)];
+  $("tempEl").textContent = (18 + Math.random() * 8).toFixed(1) + "° / " + Math.round(72 + Math.random() * 24) + "%";
+}
+setInterval(updateWeather, 21000);
+updateWeather();
+
+function updateClock(){
+  var d = new Date();
+  $("clock").textContent = d.toLocaleTimeString("en-GB", {hour12:false});
+  var h = d.getHours();
+  $("shiftEl").textContent = h >= 6 && h < 14 ? "A · 06–14" : h >= 14 && h < 22 ? "B · 14–22" : "C · 22–06";
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+/* ---------- 9. controls ---------- */
+
+document.querySelectorAll(".filter").forEach(function(b){
+  b.onclick = function(){
+    document.querySelectorAll(".filter").forEach(function(x){ x.classList.remove("active"); });
+    b.classList.add("active");
+    filter = b.dataset.filter;
+    listDirty = true;
+    renderFleetList();
+  };
+});
+
+$("closeInfo").onclick = function(){
+  $("vehicleInfo").classList.remove("show");
+  selectedId = null;
+  listDirty = true;
+};
+
+document.querySelectorAll(".info-actions .btn").forEach(function(b){
+  b.onclick = function(){
+    var v = vehIndex[selectedId];
+    if (!v) return;
+    var kind = b.dataset.cmd;
+    applyCmd(v, kind);
+    sendDL(v.id, kind === "HALT" ? "HALT" : kind === "CONVOY" ? "CONVOY" : "SPD_ADV",
+      kind === "HALT" ? "Control: hold position and apply park brake, acknowledge on radio channel 3"
+      : kind === "CONVOY" ? "Control: fall in behind the lead unit, 10 km/h, hazard beacons on"
+      : "Control: speed capped to 15 km/h until further notice", 1);
+    addAlert("Manual " + kind.toLowerCase() + " issued to " + v.id, kind === "HALT" ? "high" : "mid");
+    listDirty = true;
+  };
+});
+
+$("liveBtn").onclick = function(){
+  live = !live;
+  this.classList.toggle("active", live);
+  this.textContent = live ? "● Live" : "▶ Resume";
+  lastT = performance.now();
+};
+
+$("speedBtn").onclick = function(){
+  timeScale = timeScale === 1 ? 2 : timeScale === 2 ? 4 : 1;
+  this.textContent = timeScale + "×";
+  this.classList.toggle("active", timeScale > 1);
+};
+
+$("soundBtn").onclick = function(){
+  sound = !sound;
+  this.classList.toggle("active", sound);
+  this.textContent = sound ? "Sound on" : "Sound off";
+  if (sound) beep(880);
+};
+
+$("haltBtn").onclick = function(){
+  var halting = FLEET.some(function(v){ return !v.cmd || v.cmd.kind !== "HALT"; });
+  FLEET.forEach(function(v){ applyCmd(v, halting ? "HALT" : "RESUME"); });
+  broadcast("CTRL", halting ? "SOS" : "RESUME",
+    halting ? "All haulage stop — every unit hold at the nearest safe siding and acknowledge on channel 3"
+            : "Haulage resumed — proceed under current zone speed limits", 1, "ALL UNITS");
+  addAlert(halting ? "Control room stopped all haulage" : "Control room resumed haulage", halting ? "high" : "low");
+  this.textContent = halting ? "Resume haulage" : "Stop all haulage";
+  listDirty = true;
+};
+
+/* fog simulator */
+$("fogSlider").addEventListener("input", function(){
+  autoFog = false;
+  $("autoFogBtn").classList.remove("active");
+  $("simMode").textContent = "MANUAL";
+  var s = Number(this.value);
+  $("fogValue").textContent = s + " / 5 · " + severityLabel(s).toLowerCase();
+  ZONES.forEach(function(z){ setZoneSeverity(z, s, "manual override"); });
+});
+
+$("autoFogBtn").onclick = function(){
+  autoFog = !autoFog;
+  this.classList.toggle("active", autoFog);
+  $("simMode").textContent = autoFog ? "AUTO DRIFT" : "MANUAL";
+};
+
+$("clearFogBtn").onclick = function(){
+  ZONES.forEach(function(z){ setZoneSeverity(z, 0, "manual clear"); });
+  $("fogSlider").value = 0;
+  $("fogValue").textContent = "0 / 5 · normal";
+};
+
+/* map tools */
+var view = {x:0, y:0, w:MAP_W, h:MAP_H};
+function applyView(){
+  svg.setAttribute("viewBox", view.x + " " + view.y + " " + view.w + " " + view.h);
+  var rect = svg.getBoundingClientRect();
+  if (rect.width){
+    var mPerPx = view.w / rect.width * M_PER_UNIT;
+    $("scaleLabel").textContent = Math.round(88 * mPerPx / 10) * 10 + " m";
+  }
+}
+function zoomBy(k){
+  var cx = view.x + view.w/2, cy = view.y + view.h/2;
+  view.w = clamp(view.w * k, 320, MAP_W);
+  view.h = view.w * (MAP_H / MAP_W);
+  view.x = clamp(cx - view.w/2, -80, MAP_W - view.w + 80);
+  view.y = clamp(cy - view.h/2, -80, MAP_H - view.h + 80);
+  applyView();
+}
+$("zoomIn").onclick  = function(){ zoomBy(1/1.25); };
+$("zoomOut").onclick = function(){ zoomBy(1.25); };
+$("resetMap").onclick = function(){ view = {x:0, y:0, w:MAP_W, h:MAP_H}; applyView(); };
+
+$("labelBtn").onclick = function(){
+  showLabels = !showLabels;
+  LAYERS.labels.setAttribute("opacity", showLabels ? 1 : 0);
+  this.classList.toggle("active", showLabels);
+};
+$("fogBtn").onclick = function(){
+  showFog = !showFog;
+  LAYERS.fog.setAttribute("opacity", showFog ? 1 : 0);
+  this.classList.toggle("active", showFog);
+};
+
+svg.addEventListener("wheel", function(e){
+  e.preventDefault();
+  zoomBy(e.deltaY > 0 ? 1.12 : 1/1.12);
+}, {passive:false});
+
+var drag = null;
+svg.addEventListener("pointerdown", function(e){
+  drag = {x:e.clientX, y:e.clientY, vx:view.x, vy:view.y};
+  svg.classList.add("dragging");
+  svg.setPointerCapture(e.pointerId);
+});
+svg.addEventListener("pointermove", function(e){
+  if (!drag) return;
+  var rect = svg.getBoundingClientRect();
+  var k = view.w / rect.width;
+  view.x = drag.vx - (e.clientX - drag.x) * k;
+  view.y = drag.vy - (e.clientY - drag.y) * k;
+  applyView();
+});
+["pointerup","pointercancel","pointerleave"].forEach(function(ev){
+  svg.addEventListener(ev, function(){ drag = null; svg.classList.remove("dragging"); });
+});
+
+/* tabs + feed filters */
+document.querySelectorAll(".tab").forEach(function(t){
+  t.onclick = function(){
+    document.querySelectorAll(".tab").forEach(function(x){ x.classList.remove("active"); });
+    t.classList.add("active");
+    activeTab = t.dataset.tab;
+    var isMsg = activeTab === "msg";
+    $("feed").style.display = isMsg ? "block" : "none";
+    $("alertsFeed").style.display = isMsg ? "none" : "block";
+    $("feedTools").style.display = isMsg ? "flex" : "none";
+    $("composer").style.display = isMsg ? "block" : "none";
+    if (isMsg) renderFeed();
+  };
+});
+
+document.querySelectorAll("#feedTools .chip").forEach(function(c){
+  c.onclick = function(){
+    var k = c.dataset.f;
+    feedFilters[k] = !feedFilters[k];
+    c.classList.toggle("on", feedFilters[k]);
+    renderFeed();
+  };
+});
+
+/* composer */
+var prio = 1;
+document.querySelectorAll(".prio").forEach(function(p){
+  p.onclick = function(){
+    document.querySelectorAll(".prio").forEach(function(x){ x.classList.remove("on"); });
+    p.classList.add("on");
+    prio = +p.dataset.p;
+  };
+});
+
+var TEMPLATES = {
+  SPD_ADV: "Reduce to 15 km/h, headlights and beacons on",
+  CONVOY:  "Form convoy behind the lead unit, keep 30 m spacing",
+  HALT:    "Hold position at the nearest safe siding and acknowledge",
+  REROUTE: "Divert via the rim road to the crusher approach",
+  PED_WARN:"Person on foot on the haul road — stop and confirm clear",
+  RESUME:  "Resume normal speed under current zone limits",
+  TXT:     ""
+};
+
+function fillTargets(){
+  var opts = ['<option value="ALL">All units</option>'];
+  ZONES.forEach(function(z){ opts.push('<option value="Z' + z.id + '">Zone ' + z.id + " · " + z.name + "</option>"); });
+  FLEET.forEach(function(v){ opts.push('<option value="' + v.id + '">' + v.id + " · " + v.model + "</option>"); });
+  $("msgTarget").innerHTML = opts.join("");
+}
+fillTargets();
+
+$("msgType").onchange = function(){
+  $("msgText").value = TEMPLATES[this.value] || "";
+};
+$("msgText").value = TEMPLATES.SPD_ADV;
+
+function sendComposed(){
+  var target = $("msgTarget").value;
+  var type = $("msgType").value;
+  var body = $("msgText").value.trim() || TEMPLATES[type] || "Message from control room";
+  var kind = type === "HALT" ? "HALT" : type === "CONVOY" ? "CONVOY"
+           : type === "RESUME" ? "RESUME" : type === "SPD_ADV" ? "CAP" : null;
+
+  if (target === "ALL"){
+    broadcast("CTRL", type, body, prio, "ALL UNITS");
+    if (kind) FLEET.forEach(function(v){ applyCmd(v, kind); });
+    addAlert("Broadcast to all units: " + body, prio === 1 ? "high" : "mid");
+  } else if (target.charAt(0) === "Z" && target.length === 2){
+    var zid = target.charAt(1);
+    broadcast("CTRL", type, body, prio, "zone " + zid);
+    FLEET.forEach(function(v){
+      if (v.lastZone === zid){
+        if (kind) applyCmd(v, kind);
+        sendDL(v.id, type, body, prio);
+      }
+    });
+    addAlert("Sent to zone " + zid + ": " + body, prio === 1 ? "high" : "mid");
+  } else {
+    var v = vehIndex[target];
+    if (v && kind) applyCmd(v, kind);
+    sendDL(target, type, body, prio);
+    addAlert("Sent to " + target + ": " + body, prio === 1 ? "high" : "mid");
+  }
+  listDirty = true;
+  $("msgText").value = TEMPLATES[type] || "";
+}
+
+$("sendBtn").onclick = sendComposed;
+$("msgText").addEventListener("keydown", function(e){ if (e.key === "Enter") sendComposed(); });
+
+document.querySelectorAll("[data-quick]").forEach(function(b){
+  b.onclick = function(){
+    var q = b.dataset.quick;
+    if (q === "fog"){
+      broadcast("CTRL", "SPD_ADV", "Fog advisory in force across the lease — headlights, beacons and 20 km/h until further notice", 2, "ALL UNITS");
+      addAlert("Fog advisory broadcast to all units", "mid");
+    } else if (q === "convoy"){
+      FLEET.forEach(function(v){ applyCmd(v, "CONVOY"); });
+      broadcast("CTRL", "CONVOY", "All haul units form convoy — 10 km/h, 30 m spacing, lead unit D-07", 1, "ALL UNITS");
+      addAlert("Convoy mode ordered for the whole fleet", "high");
+    } else {
+      FLEET.forEach(function(v){ applyCmd(v, "RESUME"); });
+      broadcast("CTRL", "RESUME", "All restrictions lifted — resume normal haulage under zone limits", 2, "ALL UNITS");
+      addAlert("Normal operations resumed", "low");
+      $("haltBtn").textContent = "Stop all haulage";
+    }
+    listDirty = true;
+  };
+});
+
+window.addEventListener("resize", applyView);
+
+/* ---------- boot ---------- */
+
+paintZones();
+renderFleetList();
+renderRsuStrip();
+renderAlerts();
+applyView();
+setTimeout(applyView, 200);
+updateMetrics();
+
+addAlert("FogGuard AI initialised — 10 units and 6 roadside radios under monitoring", "low");
+addAlert("Sensor fusion online: camera, LiDAR, radar and RTK GPS", "low");
+
+broadcast("CTRL", "TXT", "FogGuard control room online — shift handover complete, all units report in", 2, "ALL UNITS");
+sendUL("D-07", "CAM", "Position beacon · 30 km/h · ore haul · loaded", 4);
+sendUL("D-03", "CAM", "Position beacon · 28 km/h · overburden · empty", 4);
+broadcast("RSU-02", "SPD_ADV", "Zone B visibility 95 m — speed cap 15 km/h, headlights and beacons on", 2, "units in zone B");
+
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
